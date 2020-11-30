@@ -15,6 +15,7 @@
         <module>contacts-discovery</module>
         <module>contacts</module>
         <module>contact-tracing-follow-up</module>
+        <module>contact-tracing-scheduler</module>
     </modules>
 
 
