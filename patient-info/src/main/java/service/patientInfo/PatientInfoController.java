@@ -1,13 +1,42 @@
 package service.patientInfo;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+
 public class PatientInfoController {
 
-    private PatientInfo info;
+    private Patient patient;
     private PatientRecord record;
 
-    @RequestMapping(value = "/patientInfo/{name}", method = RequestMethod.GET)
+    @RequestMapping(value = "/patientInfo/{patient}", method = RequestMethod.POST)
     @ResponseStatus(value = HttpStatus.OK)
-    public void storePatient(@PathVariable String name) {
-//    add name to case, store case in db
+    public void addPatient(@PathVariable Patient patient) {
+        record.patient = patient;
+//    add patient to record, store record in db
     }
+
+    //return list of all patients that havent been called for contact tracing
+    @RequestMapping(value = "/patientInfo/listPatients", method = RequestMethod.GET)
+    public @ResponseBody ArrayList<Patient> listPatients()    {
+        ArrayList<Patient> patientList = new ArrayList<>();
+//        iterate through all record in db, store relevant records in list and return to web ui
+        return patientList;
+    }
+
 }
