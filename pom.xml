@@ -15,7 +15,7 @@
         <module>contacts-discovery</module>
         <module>contacts</module>
         <module>contact-tracing-follow-up</module>
+        <module>web-ui</module>
     </modules>
-
 
 </project>
