@@ -13,11 +13,13 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.util.List;
+import java.util.logging.Logger;
 
 @RestController(value = "/results")
 public class ResultsDiscoveryController {
     private final DiscoveryClient discoveryClient;
     private final CallPatientQueue callQueue;
+    private final Logger logger = Logger.getLogger(ResultsDiscoveryController.class.getSimpleName());
 
     @Autowired
     public ResultsDiscoveryController(DiscoveryClient discoveryClient, CallPatientQueue callQueue) {
@@ -26,12 +28,13 @@ public class ResultsDiscoveryController {
     }
 
     @PutMapping(name = "/add")
-    public ResponseEntity<Long> addResult(@RequestBody Patient patient) {
+    public ResponseEntity<String> addResult(@RequestBody Patient patient) {
         // pass the result to the Patient Info Service
         // todo extract this logic out into a @Service class
         List<ServiceInstance> serviceInstances = discoveryClient.getInstances("patient-info");
         if (serviceInstances.isEmpty()) {
-            return new ResponseEntity<>(666L, HttpStatus.BAD_GATEWAY);
+            logger.warning(String.format("No service instances of type %s could be found.", "patient-info"));
+            return new ResponseEntity<>("Couldn't access a PatientInfoService.", HttpStatus.BAD_GATEWAY);
         }
         ServiceInstance patientInfoService = serviceInstances.get(0);
 
@@ -54,16 +57,18 @@ public class ResultsDiscoveryController {
 
     @GetMapping("/workitem")
     public ResponseEntity<CallPatientWorkItem> getCallPatientWorkItem() {
-        // get a workItem from the queue
-        // return it
-        return new ResponseEntity<>(new CallPatientWorkItem(), HttpStatus.OK);
+        CallPatientWorkItem workItem = callQueue.remove();
+        return new ResponseEntity<>(workItem, HttpStatus.OK);
     }
 
     @PostMapping("/workitem/edit")
-    public ResponseEntity editWorkItem(@RequestBody CallPatientWorkItem workItem) {
+    public ResponseEntity<String> editWorkItem(@RequestBody CallPatientWorkItem workItem) {
         // check workItem
-        //  done? do nothing
         //  not done? add it back to the queue
-        return null;
+        if (workItem.getStatus() != CallPatientWorkItem.Status.DONE) {
+            callQueue.add(workItem);
+        }
+
+        return ResponseEntity.accepted().build();
     }
 }
