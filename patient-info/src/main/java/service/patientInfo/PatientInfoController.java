@@ -27,7 +27,7 @@ public class PatientInfoController {
     @RequestMapping(value = "/patientInfo/{patient}", method = RequestMethod.POST)
     @ResponseStatus(value = HttpStatus.OK)
     public void addPatient(@PathVariable Patient patient) {
-        record.patient = patient;
+//        record.patient = patient;
 //    add patient to record, store record in db
     }
 
