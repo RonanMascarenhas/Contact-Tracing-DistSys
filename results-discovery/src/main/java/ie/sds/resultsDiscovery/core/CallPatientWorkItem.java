@@ -3,6 +3,7 @@ package ie.sds.resultsDiscovery.core;
 import java.time.Clock;
 import java.time.Instant;
 
+// todo this class could be refined once we decide what we want in it.
 public class CallPatientWorkItem {
     private Patient patient;
     private Instant created = Clock.systemUTC().instant();
