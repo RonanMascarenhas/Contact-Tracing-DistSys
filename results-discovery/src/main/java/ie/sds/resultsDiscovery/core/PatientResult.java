@@ -1,22 +1,22 @@
 package ie.sds.resultsDiscovery.core;
 
 public class PatientResult {
-    private PatientInfo info;
+    private Patient info;
     private Covid19Result result;
 
     public PatientResult() {
     }
 
-    public PatientResult(PatientInfo patientInfo, Covid19Result result) {
+    public PatientResult(Patient patientInfo, Covid19Result result) {
         this.info = patientInfo;
         this.result = result;
     }
 
-    public PatientInfo getInfo() {
+    public Patient getInfo() {
         return info;
     }
 
-    public void setInfo(PatientInfo info) {
+    public void setInfo(Patient info) {
         this.info = info;
     }
 

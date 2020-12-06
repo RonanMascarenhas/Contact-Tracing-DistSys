@@ -1,17 +1,21 @@
 package ie.sds.resultsDiscovery.service;
 
 import ie.sds.resultsDiscovery.core.CallPatientWorkItem;
-import org.springframework.stereotype.Service;
+import ie.sds.resultsDiscovery.core.Patient;
 
 /**
  * A wrapper for a Message-Oriented Middleware Queue
  */
-@Service
 public interface CallPatientQueue {
     /**
      * @param workItem
      */
     void add(CallPatientWorkItem workItem);
+
+    /**
+     * @param patient
+     */
+    void add(Patient patient);
 
     /**
      * @return
