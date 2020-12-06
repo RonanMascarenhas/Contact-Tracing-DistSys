@@ -2,10 +2,13 @@ package service.patientInfo;
 
 import java.util.ArrayList;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.data.repository.query.Param;
 
+@RepositoryRestResource(collectionResourceRel = "patientinfo", path = "patientinfo")
 public interface PatientRepository extends MongoRepository<Patient, String>{
     public Patient findByFirstName(String firstName);
-    public ArrayList<Patient> findByLastName(String lastName);
+    public ArrayList<Patient> findByLastName(@Param("lastname") String lastName);
 
     /*
     //web client methods

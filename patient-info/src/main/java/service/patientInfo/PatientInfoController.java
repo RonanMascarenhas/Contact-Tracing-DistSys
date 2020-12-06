@@ -19,12 +19,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+@RestController
 public class PatientInfoController {
 
     private Patient patient;
     private PatientRecord record;
 
-    @RequestMapping(value = "/patientInfo/{patient}", method = RequestMethod.POST)
+    @RequestMapping(value = "/patientinfo/{patient}", method = RequestMethod.POST)
     @ResponseStatus(value = HttpStatus.OK)
     public void addPatient(@PathVariable Patient patient) {
 //        record.patient = patient;
@@ -32,7 +33,7 @@ public class PatientInfoController {
     }
 
     //return list of all patients that havent been called for contact tracing
-    @RequestMapping(value = "/patientInfo/listPatients", method = RequestMethod.GET)
+    @RequestMapping(value = "/patientinfo/listpatients", method = RequestMethod.GET)
     public @ResponseBody ArrayList<Patient> listPatients()    {
         ArrayList<Patient> patientList = new ArrayList<>();
 //        iterate through all record in db, store relevant records in list and return to web ui
