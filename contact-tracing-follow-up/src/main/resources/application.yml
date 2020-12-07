@@ -1,6 +1,13 @@
 ---
 spring:
+  profiles: default
+  application:
+    name: contract-tracing-follow-up-service
+---
+spring:
   profiles: docker
+  application:
+    name: contract-tracing-follow-up-service
 eureka:
   client:
     serviceUrl:
