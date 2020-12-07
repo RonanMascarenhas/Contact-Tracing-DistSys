@@ -17,6 +17,8 @@ public class Subject {
         this.address = address;
     }
 
+    public Subject() {}
+
     public String getFirstName() {
         return firstName;
     }
