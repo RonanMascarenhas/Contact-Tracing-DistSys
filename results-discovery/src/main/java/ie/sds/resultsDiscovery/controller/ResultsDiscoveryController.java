@@ -27,7 +27,7 @@ public class ResultsDiscoveryController {
         this.callQueue = callQueue;
     }
 
-    @PutMapping(name = "/add")
+    @PutMapping
     public ResponseEntity<String> addResult(@RequestBody Patient patient) {
         // pass the result to the Patient Info Service
         // todo extract this logic out into a @Service class
@@ -61,7 +61,7 @@ public class ResultsDiscoveryController {
         return new ResponseEntity<>(workItem, HttpStatus.OK);
     }
 
-    @PostMapping("/workitem/edit")
+    @PostMapping("/workitem")
     public ResponseEntity<String> editWorkItem(@RequestBody CallPatientWorkItem workItem) {
         // check workItem
         //  not done? add it back to the queue
