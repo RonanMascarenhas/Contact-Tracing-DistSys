@@ -17,5 +17,6 @@
         <module>contact-tracing-follow-up</module>
         <module>web-ui</module>
         <module>eureka-server</module>
+        <module>contact-tracing-scheduler</module>
     </modules>
 </project>
