@@ -18,6 +18,4 @@
         <module>web-ui</module>
         <module>eureka-server</module>
     </modules>
-
->>>>>>> pom.xml
 </project>
