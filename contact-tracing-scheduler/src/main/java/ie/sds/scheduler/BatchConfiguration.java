@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.web.client.RestTemplate;
 
+import javax.jms.ConnectionFactory;
 import java.util.Scanner;
 
 @Configuration
@@ -39,7 +40,10 @@ public class BatchConfiguration {
         try (Scanner scan = new Scanner(apiURLFileName)) {
             apiUrl = scan.nextLine();
         }
+        // todo get rid of this
+        apiUrl = "http://localhost:8087/patients";
 
+        // todo this should add the correct endpoint to the URL here or inside the RestPatientReader, once this is finalized
         return new RestPatientReader(apiUrl, new RestTemplate());
     }
 
@@ -49,8 +53,9 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public WorkItemQueuePusher writer(@Qualifier("cpwiQueueJmsTemplate") JmsTemplate template) {
-        // todo tidy this. Do we need to provide the custom cpwiQueueJmsTemplate?
+    public WorkItemQueuePusher writer(@Qualifier("jmsConnectionFactory") ConnectionFactory connectionFactory) {
+        JmsTemplate template = new JmsTemplate(connectionFactory);
+        template.setDefaultDestinationName("CallPatientWorkItem_Queue");
         return new WorkItemQueuePusher(template);
     }
 
