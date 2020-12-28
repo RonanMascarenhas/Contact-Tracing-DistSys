@@ -1,16 +1,19 @@
 package ie.sds.scheduler;
 
 import ie.sds.core.Patient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemReader;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 public class RestPatientReader implements ItemReader<Patient> {
     private final String apiUrl;
     private final RestTemplate restTemplate;
+    private final Logger logger = LoggerFactory.getLogger(RestPatientReader.class);
 
     private int nextPatientIndex;
     private List<Patient> patientList;
@@ -43,8 +46,12 @@ public class RestPatientReader implements ItemReader<Patient> {
 
     private List<Patient> fetchPatientDataFromApi() {
         // todo error happens here: incorrect URL, fix this next
-        ResponseEntity<Patient[]> response = restTemplate.getForEntity(apiUrl, Patient[].class);
-        Patient[] patients = response.getBody();
+        Patient[] patients = restTemplate.getForObject(apiUrl, Patient[].class);
+
+        if (patients == null) {
+            logger.warn("api returned null patient data");
+            return new LinkedList<>();
+        }
         return Arrays.asList(patients);
     }
 }

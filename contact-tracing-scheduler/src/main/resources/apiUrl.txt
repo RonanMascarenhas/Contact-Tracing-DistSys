@@ -1,1 +1,1 @@
-http://localhost:8087
+http://localhost:8087/patients
