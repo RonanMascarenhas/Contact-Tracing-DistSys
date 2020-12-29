@@ -1,28 +1,136 @@
 package ie.ucd.contacttracingfollowup;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import service.messages.Contact;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 // TODO: Add RequestMappings for WebUI
-@RestController
+@Controller
+@RequestMapping(value = "/followupservice")
 public class FollowUpService {
 
+    HashMap<String, Contact> contactsMap;
+
+    @Autowired
+    public FollowUpService() {
+        contactsMap = new HashMap<>();
+    }
+
+    @GetMapping( "/")
+    public String showFollowUpRequest() {
+        return "default";
+    }
+
+    @GetMapping("/contact")
+    public String assignFollowUpContact() {
+        List<Contact> contacts = getContacts(1);
+        if (contacts.isEmpty()) {
+            // TODO: Handle case where no contact
+            return "redirect:/";
+        }
+
+        Contact contact = contacts.get(0);
+
+        contactsMap.put(contact.getId(), contact);
+        return "redirect:/followupservice/contact/" + contact.getId();
+    }
+
+    @GetMapping("/contact/{id}")
+    public String getFollowUpContact(@PathVariable("id") String id, Model model) {
+        if (!contactsMap.containsKey(id)) {
+            // TODO: Handle error
+            return "contact not available for follow up. ID: " + id;
+        }
+
+        model.addAttribute("contact", contactsMap.get(id));
+        return "contact";
+    }
+
+    @PostMapping("/contact/{id}")
+    public String updateContactFollowUpStatus(@PathVariable("id") String id,
+                                              @RequestParam("contactedStatus") boolean isContacted) {
+        Contact contact = contactsMap.get(id);
+        contact.setContactedStatus(isContacted);
+
+        // TODO: Send updated contact to contacts service (in new thread). Possible batch together for an update.
+
+        return "redirect:/followupservice/";
+    }
+
+    @PostMapping("/contacttest/{id}")
+    public String testUpdateContactFollowUpStatus(@ModelAttribute("contact") Contact contact) {
+
+        System.out.println(contact.toString());
+        // TODO: Send updated contact to contacts service (in new thread). Possible batch together for an update.
+
+        return "redirect:/followupservice/";
+    }
+
+//    @RequestMapping(value = "/contact", method = RequestMethod.GET)
+//    public String allocateContact() {
+//        List<Contact> contacts = getContacts(1);
+//        if (contacts.isEmpty()) {
+//            return "No contacts to be followed up with.";
+//        }
+//
+//        Contact contact = contacts.get(0);
+//
+//        contactsMap.put(contact.getId(), contact);
+//        return contact.toString();
+//    }
+//
+//    @RequestMapping(value = "/contact/{contact-id}", method = RequestMethod.POST)
+//    public String updateContactFollowUpStatus(@PathVariable("contact-id") String contactID) {
+//        // TODO: Consider changing from method get to remove method if individual updates
+//        Contact contact = contactsMap.get(contactID);
+//        if (contact == null) {
+//            return "Contact not pending update. Contact ID: " + contactID;
+//        }
+//
+//        contact.setContactedStatus(true);
+//
+//        // TODO: send update to ContactsService. Either individual or batch.
+//        updateFollowUpSuccessStatus(contact);
+//
+//        return "Contact updated.";
+//    }
+
     public List<Contact> getContacts(int numContacts) {
-        RestTemplate restTemplate = new RestTemplate();
-        HttpEntity<Integer> request = new HttpEntity<>(numContacts);
+        //TODO: Remove dummy data
 
-        // TODO: Get service URL from Eureka server
-        String contactService = "service/follow-up-contact";
+        ArrayList<Contact> dummyContacts = new ArrayList<>();
+        Contact contact = new Contact();
+        contact.setFirstName("John");
+        contact.setLastName("Smith");
+        contact.setPhoneNumber("0861234567");
+        contact.setId("100");
+        contact.setContactedStatus(false);
+        contact.setCasesList(new ArrayList<String>());
+        contact.getCasesList().add("101");
+        contact.getCasesList().add("102");
+        contact.setAddress("101 Covid Lane");
 
-        // TODO: Agree on approach for getting many contacts
-        Contact[] contacts = restTemplate.postForObject(contactService, request, Contact[].class);
+        dummyContacts.add(contact);
+        return dummyContacts;
 
-        return Arrays.asList(contacts);
+//        RestTemplate restTemplate = new RestTemplate();
+//        HttpEntity<Integer> request = new HttpEntity<>(numContacts);
+//
+//        // TODO: Get service URL from Eureka server
+//        String contactService = "service/follow-up-contact";
+//
+//        // TODO: Agree on approach for getting many contacts
+//        Contact[] contacts = restTemplate.postForObject(contactService, request, Contact[].class);
+//
+//        return Arrays.asList(contacts);
     }
 
     public void updateFollowUpSuccessStatus(Contact contact) {
@@ -30,9 +138,9 @@ public class FollowUpService {
         HttpEntity<Contact> request = new HttpEntity<>(contact);
 
         // TODO: Get service URL from Eureka server
-        String contactService = "service/follow-up-status/" + contact.getContactId();
+        String contactService = "service/follow-up-status/" + contact.getId();
 
-        contact.setContacted(true);
+        contact.setContactedStatus(true);
 
         restTemplate.put(contactService, contact);
     }
