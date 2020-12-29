@@ -5,25 +5,27 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.3.0.RELEASE</version>
-        <relativePath/>
+        <version>2.3.6.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
     </parent>
-
-    <artifactId>contacts</artifactId>
+    <modelVersion>4.0.0</modelVersion>
+    <name>eureka-server</name>
+    <description>Eureka Server for the Contact Tracing project.</description>
+    <artifactId>eureka-server</artifactId>
     <groupId>ie.ucd</groupId>
     <version>0.0.1</version>
-    <modelVersion>4.0.0</modelVersion>
-    <packaging>jar</packaging>
-
+    
     <properties>
         <java.version>1.8</java.version>
+        <spring-cloud.version>Hoxton.SR9</spring-cloud.version>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -35,16 +37,19 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-rest</artifactId>
-        </dependency>
-
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
@@ -52,16 +57,8 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.6.0</version>
-                <configuration>
-                    <mainClass>service.contactService.Application</mainClass>
-                </configuration>
-            </plugin>
-
         </plugins>
     </build>
+
 
 </project>

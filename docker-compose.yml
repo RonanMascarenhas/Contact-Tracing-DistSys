@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  peer1:
+    build: eureka-server
+    environment:
+      SETTINGS: peer1
+  peer2:
+    build: eureka-server
+    environment:
+      SETTINGS: peer2
+  peer3:
+    build: eureka-server
+    environment:
+      SETTINGS: peer3

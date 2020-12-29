@@ -1,0 +1,62 @@
+---
+spring:
+  profiles: default
+server:
+  port: 8761
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    registerWithEureka: false
+    fetchRegistry: false
+
+
+---
+spring:
+  profiles: peer1
+server:
+  port: 8761
+
+eureka:
+  instance:
+    hostname: peer1
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://peer1:8761/eureka/,http://peer2:8761/eureka/,http://peer3:8761/eureka/
+  server:
+    peer-node-read-timeout-ms: 60000
+
+
+---
+spring:
+  profiles: peer2
+server:
+  port: 8761
+eureka:
+  instance:
+    hostname: peer2
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://peer1:8761/eureka/,http://peer2:8761/eureka/,http://peer3:8761/eureka/
+  server:
+    peer-node-read-timeout-ms: 60000
+
+---
+spring:
+  profiles: peer3
+server:
+  port: 8761
+eureka:
+  instance:
+    hostname: peer3
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://peer1:8761/eureka/,http://peer2:8761/eureka/,http://peer3:8761/eureka/
+  server:
+    peer-node-read-timeout-ms: 60000
