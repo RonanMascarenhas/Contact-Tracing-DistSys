@@ -1,5 +1,6 @@
 package ie.ucd.sds.webUI.controller;
 
+import ie.ucd.sds.webUI.core.CallPatientWorkItem;
 import ie.ucd.sds.webUI.core.Patient;
 import ie.ucd.sds.webUI.service.DomainNameService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,5 +60,25 @@ public class ResultsDiscoveryController {
         }
         // return some indication of pass/failure
         return "problem";
+    }
+
+    private static final Patient testPatient = new Patient("22", "Harry", "Styles", "089233445");
+
+    @GetMapping("/call")
+    public String getResultsCall(Model model) {
+        //        URI resultsDiscoveryUri = dns.find(RESULTS_DISCOVERY_SERVICE);
+//        RestTemplate template = new RestTemplate();
+//        CallPatientWorkItem workItem  = template.getForObject(resultsDiscoveryUri.resolve("workitem"), CallPatientWorkItem.class);
+        CallPatientWorkItem workItem = new CallPatientWorkItem(testPatient);
+        model.addAttribute("workItem", workItem);
+        model.addAttribute("statuses", CallPatientWorkItem.Status.values());
+
+        return "/results/call/index";
+    }
+
+    @PostMapping("/call")
+    public String editResultsCall(@ModelAttribute CallPatientWorkItem workItem, Model model) {
+
+        return "/results/call/accepted";
     }
 }
