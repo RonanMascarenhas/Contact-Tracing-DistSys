@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 @RestController
-public class PatientInfoController {
+public class PatientInfoController {    //extends Subject class from core, uses Subject fields (master branch) {
 
     private Patient patient;
     private PatientRecord record;
@@ -30,6 +30,7 @@ public class PatientInfoController {
     public void addPatient(@PathVariable Patient patient) {
 //        record.patient = patient;
 //    add patient to record, store record in db
+//        get patient object from body of REST message, store it in db
     }
 
     //return list of all patients that havent been called for contact tracing

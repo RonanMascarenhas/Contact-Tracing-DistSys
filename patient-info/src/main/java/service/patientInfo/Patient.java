@@ -1,33 +1,51 @@
 package service.patientInfo;
 
 import org.springframework.data.annotation.Id;
-import java.util.ArrayList;
 import java.io.Serializable;
+
+enum ContactTraced  {
+    YES,
+    NO
+}
 
 public class Patient implements Serializable{
 
     //Rem-best practice is public fields??
     @Id
     private String id;  //for internal use by mongodb(see https://spring.io/guides/gs/accessing-data-mongodb/#scratch)
+    private ContactTraced ct;
 
-    private String firstName;
-    private String lastName;
-    private String phoneNumber;
+    private PatientInfo info;
+    private TestResult result;
+
 
     public Patient(){};
 
-    public Patient(String id, String firstName, String lastName, String phoneNumber){
+    public Patient(String id, PatientInfo info, TestResult result, ContactTraced ct){
         this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.phoneNumber = phoneNumber;
+        this.info = info;
+        this.result = result;
+        this.ct = ct;
+//        this.firstName = firstName;
+//        this.lastName = lastName;
+//        this.phoneNumber = phoneNumber;
     };
+
 
     public String getId()   { return id; }
     public void setId(String id)  {
         this.id=id;
     }
 
+    public ContactTraced getContactTraced()   { return ct; }
+    public void setContactTraced(ContactTraced ct)  { this.ct=ct; }
+
+
+//    private String firstName;
+//    private String lastName;
+//    private String phoneNumber;
+
+    /*
     public String getFirstName()   { return firstName; }
     public void setFirstName(String firstName)  {
         this.firstName=firstName;
@@ -46,12 +64,13 @@ public class Patient implements Serializable{
     public void setPhoneNumber(String phoneNumber)  {
         this.phoneNumber=phoneNumber;
     }
+    */
 
     @Override
     public String toString() {
         return String.format(
-                "Patient[id=%s, firstName='%s', lastName='%s', phoneNumber='%s']",
-                id, firstName, lastName, phoneNumber);
+                "Patient[id=%s, info=%s, results=%s]",
+                id, info.toString(), result.toString());
     }
 
 }
