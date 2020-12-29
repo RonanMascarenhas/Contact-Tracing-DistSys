@@ -1,14 +1,31 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-<!-- Use the parentheses below to assign a title to the page -->
+<!--/* Use the parentheses below to assign a title to the page */-->
 <div th:replace="fragments/head.html :: head ('Add Result')"></div>
 
 <body>
 <div th:replace="fragments/navbar.html :: navbar"></div>
-<h1>
-  This is results/index
-</h1>
+<!--/* START PAGE CONTENT */-->
+<div th:id="add-result-form">
+  <h3>Add Result</h3>
+  <form action="#" method="post" th:action="@{/results/}" th:object="${patient}">
+    <div class="form-group">
+      <label class="col-form-label" for="firstName">First Name</label>
+      <input class="form-control" id="firstName" th:field="*{firstName}" type="text">
+    </div>
+    <div class="form-group">
+      <label class="col-form-label" for="lastName">Last Name</label>
+      <input class="form-control" id="lastName" th:field="*{lastName}" type="text">
+    </div>
+    <div class="form-group">
+      <label class="col-form-label" for="phoneNumber">Phone Number</label>
+      <input class="form-control" id="phoneNumber" th:field="*{phoneNumber}" type="text">
+    </div>
+    <button class="btn btn-primary" type="submit">Submit</button>
+  </form>
+  <!--/* END PAGE CONTENT */-->
+</div>
 
 <div th:replace="fragments/includeScripts.html"></div>
 </body>
