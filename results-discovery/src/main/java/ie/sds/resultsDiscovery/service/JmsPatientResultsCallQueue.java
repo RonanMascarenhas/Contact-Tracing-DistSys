@@ -32,16 +32,16 @@ public class JmsPatientResultsCallQueue implements PatientResultsCallQueue {
     }
 
     @Override
+    public void add(Patient patient) {
+        PatientResultWorkItem workItem = new PatientResultWorkItem(patient);
+        add(workItem);
+    }
+
+    @Override
     public void addWithPriority(PatientResultWorkItem workItem) {
         setHighPriority();
         add(workItem);
         setRegularPriority();
-    }
-
-    @Override
-    public void add(Patient patient) {
-        PatientResultWorkItem workItem = new PatientResultWorkItem(patient);
-        add(workItem);
     }
 
     /**

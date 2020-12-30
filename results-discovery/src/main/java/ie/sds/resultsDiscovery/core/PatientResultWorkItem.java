@@ -3,7 +3,7 @@ package ie.sds.resultsDiscovery.core;
 import java.time.Clock;
 import java.time.Instant;
 
-// todo this class could be refined once we decide what we want in it.
+// todo replace with the new version in the core
 // todo before deleting: Add a constructor with a Patient parameter.
 public class PatientResultWorkItem {
     private Instant created = Clock.systemUTC().instant();
@@ -13,7 +13,6 @@ public class PatientResultWorkItem {
     private String name;
     private String phoneNumber;
     private TestResult result;
-
 
     public PatientResultWorkItem() {
     }
@@ -96,21 +95,19 @@ public class PatientResultWorkItem {
     }
 
     public enum Status {
-        TODO, IN_PROGRESS, DONE;
+        TODO("To Do"),
+        IN_PROGRESS("In Progress"),
+        DONE("Done");
+
+        private String readable;
+
+        Status(String readable) {
+            this.readable = readable;
+        }
 
         @Override
         public String toString() {
-            String value;
-            switch (this) {
-                case TODO:
-                    value = "todo";
-                    break;
-                default:
-                    // todo implement this later if necessary
-                    value = "";
-                    break;
-            }
-            return value;
+            return readable;
         }
     }
 }
