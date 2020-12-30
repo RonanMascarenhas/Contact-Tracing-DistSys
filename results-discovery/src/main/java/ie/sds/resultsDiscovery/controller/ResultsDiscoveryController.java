@@ -82,9 +82,11 @@ public class ResultsDiscoveryController {
         // check workItem
         //  not done? add it back to the queue
         if (workItem.getStatus() != PatientResultWorkItem.Status.DONE) {
-            callQueue.add(workItem);
+            logger.info(String.format("Adding PatientResultWorkItem with id=%s back to the queue", workItem.getPatientId()));
+            callQueue.addWithPriority(workItem);
         }
 
+        logger.info("Finished in 'POST /result/workitem'");
         return ResponseEntity.accepted().build();
     }
 }
