@@ -33,5 +33,4 @@ public class TestResult {
         return String.format("TestResult[Date='%s', Result='%s']", date, r);
     }
 
-
 }

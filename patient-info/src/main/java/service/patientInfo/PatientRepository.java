@@ -7,8 +7,8 @@ import org.springframework.data.repository.query.Param;
 
 @RepositoryRestResource(collectionResourceRel = "patientinfo", path = "patientinfo")
 public interface PatientRepository extends MongoRepository<Patient, String>{
-    public Patient findByFirstName(String firstName);
-    public ArrayList<Patient> findByLastName(@Param("lastname") String lastName);
+//    public Patient findByFirstName(String firstName);
+//    public ArrayList<Patient> findBySurname(@Param("surname") String surname);
 
     /*
     //web client methods

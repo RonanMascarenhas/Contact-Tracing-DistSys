@@ -1,40 +1,26 @@
 package service.patientInfo;
 
-public class PatientInfo {
+import service.core.Subject;
 
-    private String firstName;
-    private String lastName;
-    private String phoneNumber;
+public class PatientInfo extends Subject{
 
     public PatientInfo(){};
 
-    public PatientInfo(String id, String firstName, String lastName, String phoneNumber)    {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.phoneNumber = phoneNumber;
+    public PatientInfo(String firstName, String surname, int age, char sex, String phoneNumber, String address)    {
+        this.setFirstName(firstName);
+        this.setSurname(surname);
+        this.setAge(age);
+        this.setSex(sex);
+        this.setPhoneNumber(phoneNumber);
+        this.setAddress(address);
     };
 
-    public String getFirstName()   { return firstName; }
-    public void setFirstName(String firstName)  {
-        this.firstName=firstName;
-    }
-
-    public String getLastName()   {
-        return lastName;
-    }
-    public void setLastName(String lastName)  {
-        this.lastName=lastName;
-    }
-
-    public String getPhoneNumber()   {
-        return phoneNumber;
-    }
-    public void setPhoneNumber(String phoneNumber)  {
-        this.phoneNumber=phoneNumber;
-    }
+//    public ArrayList<Patient> findBySurname(@Param("surname") String surname);
 
     @Override
     public String toString() {
-        return String.format("PatientInfo[firstName='%s', lastName='%s', phoneNumber='%s']", firstName, lastName, phoneNumber);
+        return String.format("PatientInfo[firstName='%s', surname='%s', age='%d', sex='%c', phoneNumber='%s', address='%s']",
+                this.getFirstName(), this.getSurname(), this.getAge(),this.getSex(), this.getPhoneNumber(), this.getAddress());
     }
 }
+

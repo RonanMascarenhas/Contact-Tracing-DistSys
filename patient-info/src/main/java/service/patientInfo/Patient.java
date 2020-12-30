@@ -10,7 +10,6 @@ enum ContactTraced  {
 
 public class Patient implements Serializable{
 
-    //Rem-best practice is public fields??
     @Id
     private String id;  //for internal use by mongodb(see https://spring.io/guides/gs/accessing-data-mongodb/#scratch)
     private ContactTraced ct;
@@ -26,51 +25,20 @@ public class Patient implements Serializable{
         this.info = info;
         this.result = result;
         this.ct = ct;
-//        this.firstName = firstName;
-//        this.lastName = lastName;
-//        this.phoneNumber = phoneNumber;
     };
 
 
     public String getId()   { return id; }
-    public void setId(String id)  {
-        this.id=id;
-    }
+    public void setId(String id)  { this.id=id; }
 
     public ContactTraced getContactTraced()   { return ct; }
     public void setContactTraced(ContactTraced ct)  { this.ct=ct; }
 
-
-//    private String firstName;
-//    private String lastName;
-//    private String phoneNumber;
-
-    /*
-    public String getFirstName()   { return firstName; }
-    public void setFirstName(String firstName)  {
-        this.firstName=firstName;
-    }
-
-    public String getLastName()   {
-        return lastName;
-    }
-    public void setLastName(String lastName)  {
-        this.lastName=lastName;
-    }
-
-    public String getPhoneNumber()   {
-        return phoneNumber;
-    }
-    public void setPhoneNumber(String phoneNumber)  {
-        this.phoneNumber=phoneNumber;
-    }
-    */
-
     @Override
     public String toString() {
         return String.format(
-                "Patient[id=%s, info=%s, results=%s]",
-                id, info.toString(), result.toString());
+                "Patient[id=%s, info=%s, results=%s, contactTraced=%s]",
+                id, info.toString(), result.toString(), ct.toString());
     }
 
 }

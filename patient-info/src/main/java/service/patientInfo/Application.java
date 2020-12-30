@@ -14,6 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.CommandLineRunner;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.concurrent.ThreadLocalRandom;
 //import com.mongodb.client.MongoClient;
 //import com.mongodb.client.MongoDatabase;
 
@@ -28,15 +32,27 @@ public class Application implements CommandLineRunner{
         SpringApplication.run(Application.class, args);
     }
 
+//    "Patient[id=%s, info=%s, results=%s, contactTraced=%s]",
+//    "PatientInfo[firstName='%s', lastName='%s', age='%d', sex='%c', phoneNumber='%s', address='%s']",
+//    "TestResult[Date='%s', Result='%s']",
+
+
     @Override
     public void run(String... args) throws Exception {
         patientRepo.deleteAll();
 
+        Date d1 = new Date();
+        Date d2 = new Date();
+
         //    TEST DATA
         String query;
-        String testResults;         //cchange later
-        Patient p1 = new Patient("0","A","B","0123456789");
-        Patient p2 = new Patient("1","X","Y","0987654321");
+        String testResults;         //change later
+        Patient p1 = new Patient("0",new PatientInfo("A", "B", 20, 'M', "0123456789", "012 Main Street"),
+                new TestResult(d1, Result.POSITIVE), ContactTraced.YES);
+        Patient p2 = new Patient("1",new PatientInfo("X", "Y", 50, 'F', "0987654321", "98 Bridge Street"),
+                new TestResult(d2, Result.NEGATIVE), ContactTraced.NO);
+
+//        public ArrayList<Patient> findBySurname(@Param("surname") String surname);
 
         patientRepo.save(p1);
         patientRepo.save(p2);
@@ -51,13 +67,13 @@ public class Application implements CommandLineRunner{
         // fetch an individual patient/patients based on query
         System.out.println("Patients found with findByFirstName('A'):");
         System.out.println("--------------------------------");
-        System.out.println(patientRepo.findByFirstName("A"));
+//        System.out.println(patientRepo.findByFirstName("A"));
 
-        System.out.println("Customers found with findByLastName('Y'):");
+        System.out.println("Customers found with findBySurname('Y'):");
         System.out.println("--------------------------------");
-        for (Patient p : patientRepo.findByLastName("Y")) {
-            System.out.println(p);
-        }
+//        for (Patient p : patientRepo.findBySurname("Y")) {
+//            System.out.println(p);
+//        }
 
         /*
         try {
