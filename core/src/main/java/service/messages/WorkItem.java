@@ -4,26 +4,19 @@ import java.io.Serializable;
 import java.time.Clock;
 import java.time.Instant;
 
-// todo take another look at this class
-public class CallPatientWorkItem implements Serializable {
-    private String patientId;
+public abstract class WorkItem implements Serializable {
     private Instant created = Clock.systemUTC().instant();
-    private Instant lastAccessed;
+    private Instant lastAccessed = created;
     private Status status = Status.TODO;
 
-    public CallPatientWorkItem() {
-    }
-
-    public CallPatientWorkItem(String patientId) {
-        this.patientId = patientId;
-    }
-
-    public String getPatientId() {
-        return patientId;
-    }
-
-    public void setPatientId(String patientId) {
-        this.patientId = patientId;
+    /**
+     * Updates the status of this WorkItem and records the update time.
+     *
+     * @param status the new status of the WorkItem
+     */
+    public void updateStatus(Status status) {
+        this.status = status;
+        lastAccessed = Clock.systemUTC().instant();
     }
 
     public Instant getCreated() {
