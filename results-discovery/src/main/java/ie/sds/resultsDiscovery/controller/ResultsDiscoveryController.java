@@ -3,55 +3,60 @@ package ie.sds.resultsDiscovery.controller;
 import ie.sds.resultsDiscovery.core.CallPatientWorkItem;
 import ie.sds.resultsDiscovery.core.Patient;
 import ie.sds.resultsDiscovery.service.CallPatientQueue;
+import ie.sds.resultsDiscovery.service.DomainNameService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import service.exception.NoSuchServiceException;
 
 import java.net.URI;
-import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 
-@RestController(value = "/results")
+@RestController
+@RequestMapping("/result")
 public class ResultsDiscoveryController {
-    private final DiscoveryClient discoveryClient;
+    private final DomainNameService dns;
     private final CallPatientQueue callQueue;
     private final Logger logger = Logger.getLogger(ResultsDiscoveryController.class.getSimpleName());
 
     @Autowired
-    public ResultsDiscoveryController(DiscoveryClient discoveryClient, CallPatientQueue callQueue) {
-        this.discoveryClient = discoveryClient;
+    public ResultsDiscoveryController(DomainNameService dns, CallPatientQueue callQueue) {
+        this.dns = dns;
         this.callQueue = callQueue;
     }
 
-    @PutMapping
-    public ResponseEntity<String> addResult(@RequestBody Patient patient) {
+    @PostMapping
+    public ResponseEntity<String> addResult(@RequestBody Patient patient) throws NoSuchServiceException {
         // pass the result to the Patient Info Service
-        // todo extract this logic out into a @Service class
-        List<ServiceInstance> serviceInstances = discoveryClient.getInstances("patient-info");
-        if (serviceInstances.isEmpty()) {
-            logger.warning(String.format("No service instances of type %s could be found.", "patient-info"));
-            return new ResponseEntity<>("Couldn't access a PatientInfoService.", HttpStatus.BAD_GATEWAY);
-        }
-        ServiceInstance patientInfoService = serviceInstances.get(0);
+        URI patientInfoServiceURI = dns.find("patient-info")
+                .orElseThrow(dns.getServiceNotFoundSupplier("patient-info"));
 
-        URI serviceURI = patientInfoService.getUri();
         RestTemplate template = new RestTemplate();
+        ResponseEntity<?> response = template.postForEntity(patientInfoServiceURI.resolve("patientinfo"), patient, Object.class);
+
+        // todo Discuss with Ronan
+        //  200 => resource updated
+        //  201 => resource created
+        //  422 => correct resource syntax, incorrect semantics
+        // If there was an error
+        if (response.getStatusCode().value() >= 300) {
+            return ResponseEntity.unprocessableEntity().build();
+        }
+
+        // Otherwise all is well
+        if (response.getStatusCode() == HttpStatus.CREATED) {
+            // queue the result for a call
+            callQueue.add(patient);
+        }
         // todo negotiate this with Ronan
         //  Check what should be the return object
         //  Should contain a link to new Patient object in the Service e.g. (patientinfo/{patientId}}
-        template.postForObject(serviceURI, patient, Object.class);
-        URI newResourceLocation = URI.create("https://www.google.com/");
-
-        // queue the result for a call
-        callQueue.add(patient);
-
         // return a link to the new PatientInfo resource (In the PatientInfoService)
-        return ResponseEntity.noContent()
-                .location(newResourceLocation)
+        return ResponseEntity.status(response.getStatusCode())
+                .location(Objects.requireNonNull(response.getHeaders().getLocation()))
                 .build();
     }
 
