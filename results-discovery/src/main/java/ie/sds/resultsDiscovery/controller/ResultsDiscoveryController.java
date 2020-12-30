@@ -1,9 +1,9 @@
 package ie.sds.resultsDiscovery.controller;
 
-import ie.sds.resultsDiscovery.core.CallPatientWorkItem;
 import ie.sds.resultsDiscovery.core.Patient;
-import ie.sds.resultsDiscovery.service.CallPatientQueue;
+import ie.sds.resultsDiscovery.core.PatientResultWorkItem;
 import ie.sds.resultsDiscovery.service.DomainNameService;
+import ie.sds.resultsDiscovery.service.PatientResultsCallQueue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,11 +19,11 @@ import java.util.logging.Logger;
 @RequestMapping("/result")
 public class ResultsDiscoveryController {
     private final DomainNameService dns;
-    private final CallPatientQueue callQueue;
+    private final PatientResultsCallQueue callQueue;
     private final Logger logger = Logger.getLogger(ResultsDiscoveryController.class.getSimpleName());
 
     @Autowired
-    public ResultsDiscoveryController(DomainNameService dns, CallPatientQueue callQueue) {
+    public ResultsDiscoveryController(DomainNameService dns, PatientResultsCallQueue callQueue) {
         this.dns = dns;
         this.callQueue = callQueue;
     }
@@ -36,41 +36,46 @@ public class ResultsDiscoveryController {
 
         RestTemplate template = new RestTemplate();
         ResponseEntity<?> response = template.postForEntity(patientInfoServiceURI.resolve("patientinfo"), patient, Object.class);
+        int statusCode = response.getStatusCodeValue();
 
         // todo Discuss with Ronan
         //  200 => resource updated
         //  201 => resource created
         //  422 => correct resource syntax, incorrect semantics
         // If there was an error
-        if (response.getStatusCode().value() >= 300) {
+        if (statusCode >= 300) {
+            logger.warning(String.format("Service at %s returned status %d: %s", patientInfoServiceURI, statusCode, response.getBody()));
             return ResponseEntity.unprocessableEntity().build();
         }
 
         // Otherwise all is well
         if (response.getStatusCode() == HttpStatus.CREATED) {
             // queue the result for a call
+            logger.info(String.format("Queueing patient %s %s for a Results Call", patient.getInfo().getFirstName(), patient.getInfo().getLastName()));
             callQueue.add(patient);
         }
+
         // todo negotiate this with Ronan
         //  Check what should be the return object
         //  Should contain a link to new Patient object in the Service e.g. (patientinfo/{patientId}}
         // return a link to the new PatientInfo resource (In the PatientInfoService)
+        logger.info("Finished in 'POST /result'");
         return ResponseEntity.status(response.getStatusCode())
                 .location(Objects.requireNonNull(response.getHeaders().getLocation()))
                 .build();
     }
 
     @GetMapping("/workitem")
-    public ResponseEntity<CallPatientWorkItem> getCallPatientWorkItem() {
-        CallPatientWorkItem workItem = callQueue.remove();
+    public ResponseEntity<PatientResultWorkItem> getCallPatientWorkItem() {
+        PatientResultWorkItem workItem = callQueue.remove();
         return new ResponseEntity<>(workItem, HttpStatus.OK);
     }
 
     @PostMapping("/workitem")
-    public ResponseEntity<String> editWorkItem(@RequestBody CallPatientWorkItem workItem) {
+    public ResponseEntity<String> editWorkItem(@RequestBody PatientResultWorkItem workItem) {
         // check workItem
         //  not done? add it back to the queue
-        if (workItem.getStatus() != CallPatientWorkItem.Status.DONE) {
+        if (workItem.getStatus() != PatientResultWorkItem.Status.DONE) {
             callQueue.add(workItem);
         }
 

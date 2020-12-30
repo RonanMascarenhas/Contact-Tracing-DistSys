@@ -1,7 +1,7 @@
 package ie.sds.resultsDiscovery.service;
 
-import ie.sds.resultsDiscovery.core.CallPatientWorkItem;
 import ie.sds.resultsDiscovery.core.Patient;
+import ie.sds.resultsDiscovery.core.PatientResultWorkItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
@@ -22,20 +22,20 @@ public class JmsPatientResultsCallQueue implements PatientResultsCallQueue {
     }
 
     @Override
-    public void add(CallPatientWorkItem workItem) {
+    public void add(PatientResultWorkItem workItem) {
         template.convertAndSend(workItem);
     }
 
     @Override
     public void add(Patient patient) {
-        CallPatientWorkItem workItem = new CallPatientWorkItem(patient);
+        PatientResultWorkItem workItem = new PatientResultWorkItem(patient);
 
         // pass this to JMS
     }
 
     @Override
-    public CallPatientWorkItem remove() {
-        return (CallPatientWorkItem) template.receiveAndConvert();
+    public PatientResultWorkItem remove() {
+        return (PatientResultWorkItem) template.receiveAndConvert();
     }
 
     @Override

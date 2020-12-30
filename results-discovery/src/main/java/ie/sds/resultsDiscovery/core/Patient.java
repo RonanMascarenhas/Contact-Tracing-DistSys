@@ -51,8 +51,31 @@ public class Patient implements Serializable {
         this.ct = ct;
     }
 
+    public ContactTraced getCt() {
+        return ct;
+    }
 
-//    private String firstName;
+    public void setCt(ContactTraced ct) {
+        this.ct = ct;
+    }
+
+    public PatientInfo getInfo() {
+        return info;
+    }
+
+    public void setInfo(PatientInfo info) {
+        this.info = info;
+    }
+
+    public TestResult getResult() {
+        return result;
+    }
+
+    public void setResult(TestResult result) {
+        this.result = result;
+    }
+
+    //    private String firstName;
 //    private String lastName;
 //    private String phoneNumber;
 
