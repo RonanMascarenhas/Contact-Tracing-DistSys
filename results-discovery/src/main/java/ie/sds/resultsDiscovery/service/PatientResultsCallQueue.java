@@ -6,7 +6,7 @@ import ie.sds.resultsDiscovery.core.Patient;
 /**
  * A wrapper for a Message-Oriented Middleware Queue
  */
-public interface CallPatientQueue {
+public interface PatientResultsCallQueue {
     /**
      * @param workItem
      */
@@ -21,4 +21,9 @@ public interface CallPatientQueue {
      * @return
      */
     CallPatientWorkItem remove();
+
+    /**
+     *
+     */
+    boolean isEmpty();
 }
