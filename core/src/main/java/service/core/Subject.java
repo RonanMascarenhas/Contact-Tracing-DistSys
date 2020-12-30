@@ -1,12 +1,12 @@
 package service.core;
 
 public class Subject {
-    String firstName;
-    String surname;
-    int age;
-    char sex;
-    String phoneNumber;
-    String address;
+    private String firstName;
+    private String surname;
+    private int age;
+    private char sex;
+    private String phoneNumber;
+    private String address;
 
     public Subject(String firstName, String surname, int age, char sex, String phoneNumber, String address) {
         this.firstName = firstName;

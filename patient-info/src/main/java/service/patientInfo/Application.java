@@ -9,51 +9,59 @@ Field: It is a name-value pair in a document.
 package service.patientInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
-//import com.mongodb.*;
-//import org.bson.types.ObjectId;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpEntity;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.ThreadLocalRandom;
-//import com.mongodb.client.MongoClient;
-//import com.mongodb.client.MongoDatabase;
 
 
 @SpringBootApplication
-public class Application implements CommandLineRunner{
+public class Application {
 
-    @Autowired
-    private PatientRepository patientRepo;
+//    @Autowired
+//    private PatientRepository patientRepo;
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
-    }
-
-//    "Patient[id=%s, info=%s, results=%s, contactTraced=%s]",
-//    "PatientInfo[firstName='%s', lastName='%s', age='%d', sex='%c', phoneNumber='%s', address='%s']",
-//    "TestResult[Date='%s', Result='%s']",
-
-
-    @Override
-    public void run(String... args) throws Exception {
-        patientRepo.deleteAll();
-
-        Date d1 = new Date();
-        Date d2 = new Date();
 
         //    TEST DATA
-        String query;
-        String testResults;         //change later
-        Patient p1 = new Patient("0",new PatientInfo("A", "B", 20, 'M', "0123456789", "012 Main Street"),
-                new TestResult(d1, Result.POSITIVE), ContactTraced.YES);
-        Patient p2 = new Patient("1",new PatientInfo("X", "Y", 50, 'F', "0987654321", "98 Bridge Street"),
-                new TestResult(d2, Result.NEGATIVE), ContactTraced.NO);
+        Date d1 = new Date();
+        Date d2 = new Date();
+        Patient p1 = new Patient("0", "A", "Z", "0123456789", Result.POSITIVE, ContactTraced.YES);
+        Patient p2 = new Patient("1", "B", "Y", "0123456789", Result.NEGATIVE, ContactTraced.NO);
 
-//        public ArrayList<Patient> findBySurname(@Param("surname") String surname);
+        RestTemplate restTemplate = new RestTemplate();
+        HttpEntity<Patient> request = new HttpEntity<>(p1);
+        HttpEntity<Patient> request1 = new HttpEntity<>(p2);
 
+        System.out.println("APPLICATION-PASSING PATIENT TO CONTROLLER\n");
+        ResponseEntity<Patient> patientEntity = restTemplate.postForEntity("http://localhost:8080/patientinfo", request, Patient.class);
+        Patient p0 = patientEntity.getBody();
+        System.out.println("APPLICATION: PATIENT RECEIVED: " + p0.getFirstName() + p0.getSurname());
+
+        System.out.println("APPLICATION-PASSING PATIENT TO CONTROLLER\n");
+        ResponseEntity<Patient> patientEntity1 = restTemplate.postForEntity("http://localhost:8080/patientinfo", request1, Patient.class);
+        Patient p9 = patientEntity1.getBody();
+        System.out.println("APPLICATION: PATIENT RECEIVED: " + p9.getFirstName() + p9.getSurname());
+
+
+//        HttpEntity<Student> body = new HttpEntity(student);
+//URL url = new URL("http://localhost:8080/students/"+
+//                                          student.getId());
+//ResponseEntity<String> result =
+//              restTemplate.putForEntity(uri, body, String.class);
+
+//        HttpEntity<ClientInfo> request = new HttpEntity<>(c);
+//			//POST call to broker, returning completed client application
+//            ClientApplication ca = restTemplate.postForObject("http://localhost:8080/applications", request, ClientApplication.class);
+
+    /*
         patientRepo.save(p1);
         patientRepo.save(p2);
 
@@ -74,26 +82,7 @@ public class Application implements CommandLineRunner{
 //        for (Patient p : patientRepo.findBySurname("Y")) {
 //            System.out.println(p);
 //        }
-
-        /*
-        try {
-            MongoClient mongo = new MongoClient("localhost", 27017);
-            DB patientdb = mongo.getDB("patientDB");
-            DBCollection patients = patientdb.getCollection("patients");
-            DBObject patient = new BasicDBObject("id", new ObjectId())
-                    .append("FirstName", p1.getFirstName())
-                    .append("LastName", p1.getLastName())
-                    .append("PhoneNumber", p1.getPhoneNumber());
-
-            patients.insert(patient);
-        }
-        catch (Exception e) {
-            System.out.println(
-                    "Connection establishment failed");
-            System.out.println(e);
-        }
-        */
-
+    */
     }
 
 }
