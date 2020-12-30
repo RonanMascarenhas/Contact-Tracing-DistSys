@@ -21,7 +21,7 @@
                                 <th>First Name</th>
                                 <th>Last Name</th>
                                 <th>Phone Number</th>
-                                <!--                <th>Date of Case</th>-->
+                                <th>Date of Case</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -30,6 +30,7 @@
                                 <td th:text="${contact.firstName}"></td>
                                 <td th:text="${contact.lastName}"></td>
                                 <td th:text="${contact.phoneNumber}"></td>
+                                <td th:text="${caseDate}"></td>
                             </tr>
                         </tbody>
                     </table>

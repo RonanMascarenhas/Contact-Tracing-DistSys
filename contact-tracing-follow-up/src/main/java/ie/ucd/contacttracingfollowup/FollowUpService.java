@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import service.messages.Contact;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 // TODO: Add RequestMappings for WebUI
 @Controller
@@ -52,6 +52,13 @@ public class FollowUpService {
         }
 
         model.addAttribute("contact", contactsMap.get(id));
+
+        Date date = new Date((long) contactsMap.get(id).getDateOfCase() * 1000L);
+        DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss z");
+        format.setTimeZone(TimeZone.getTimeZone("Europe/Dublin"));
+        String formattedDate = format.format(date);
+        model.addAttribute("caseDate", formattedDate);
+
         return "contact";
     }
 
@@ -118,6 +125,7 @@ public class FollowUpService {
         contact.getCasesList().add("101");
         contact.getCasesList().add("102");
         contact.setAddress("101 Covid Lane");
+        contact.setDateOfCase(1592226600L);
 
         dummyContacts.add(contact);
         return dummyContacts;
