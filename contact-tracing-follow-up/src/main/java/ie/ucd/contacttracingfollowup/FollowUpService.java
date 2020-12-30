@@ -8,13 +8,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import service.messages.Contact;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 // TODO: Add RequestMappings for WebUI
 @Controller
-@RequestMapping(value = "/followupservice")
+@RequestMapping(value = "/followup")
 public class FollowUpService {
 
     HashMap<String, Contact> contactsMap;
@@ -40,7 +41,7 @@ public class FollowUpService {
         Contact contact = contacts.get(0);
 
         contactsMap.put(contact.getId(), contact);
-        return "redirect:/followupservice/contact/" + contact.getId();
+        return "redirect:/followup/contact/" + contact.getId();
     }
 
     @GetMapping("/contact/{id}")
@@ -62,16 +63,16 @@ public class FollowUpService {
 
         // TODO: Send updated contact to contacts service (in new thread). Possible batch together for an update.
 
-        return "redirect:/followupservice/";
+        return "redirect:/followup/";
     }
 
     @PostMapping("/contacttest/{id}")
     public String testUpdateContactFollowUpStatus(@ModelAttribute("contact") Contact contact) {
-
+        contact.setContactedDate((double) Instant.now().toEpochMilli()/ 1000L);
         System.out.println(contact.toString());
         // TODO: Send updated contact to contacts service (in new thread). Possible batch together for an update.
 
-        return "redirect:/followupservice/";
+        return "redirect:/followup/";
     }
 
 //    @RequestMapping(value = "/contact", method = RequestMethod.GET)
