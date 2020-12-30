@@ -1,7 +1,7 @@
 package ie.sds.resultsDiscovery.service;
 
 import ie.sds.resultsDiscovery.core.Patient;
-import ie.sds.resultsDiscovery.core.PatientResultWorkItem;
+import ie.sds.resultsDiscovery.core.PatientResultCallWorkItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
@@ -27,18 +27,18 @@ public class JmsPatientResultsCallQueue implements PatientResultsCallQueue {
     }
 
     @Override
-    public void add(PatientResultWorkItem workItem) {
+    public void add(PatientResultCallWorkItem workItem) {
         template.convertAndSend(workItem);
     }
 
     @Override
     public void add(Patient patient) {
-        PatientResultWorkItem workItem = new PatientResultWorkItem(patient);
+        PatientResultCallWorkItem workItem = new PatientResultCallWorkItem(patient);
         add(workItem);
     }
 
     @Override
-    public void addWithPriority(PatientResultWorkItem workItem) {
+    public void addWithPriority(PatientResultCallWorkItem workItem) {
         setHighPriority();
         add(workItem);
         setRegularPriority();
@@ -51,8 +51,8 @@ public class JmsPatientResultsCallQueue implements PatientResultsCallQueue {
      * @return A {@code PatientResultWorkItem} from the Queue
      */
     @Override
-    public PatientResultWorkItem remove() {
-        return (PatientResultWorkItem) template.receiveAndConvert();
+    public PatientResultCallWorkItem remove() {
+        return (PatientResultCallWorkItem) template.receiveAndConvert();
     }
 
     @Override

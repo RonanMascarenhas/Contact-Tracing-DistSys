@@ -1,7 +1,7 @@
 package ie.sds.resultsDiscovery.service;
 
 import ie.sds.resultsDiscovery.core.Patient;
-import ie.sds.resultsDiscovery.core.PatientResultWorkItem;
+import ie.sds.resultsDiscovery.core.PatientResultCallWorkItem;
 
 /**
  * A wrapper for a Message-Oriented Middleware Queue
@@ -10,7 +10,7 @@ public interface PatientResultsCallQueue {
     /**
      * @param workItem
      */
-    void add(PatientResultWorkItem workItem);
+    void add(PatientResultCallWorkItem workItem);
 
     /**
      * @param patient
@@ -20,12 +20,12 @@ public interface PatientResultsCallQueue {
     /**
      * @param workItem
      */
-    void addWithPriority(PatientResultWorkItem workItem);
+    void addWithPriority(PatientResultCallWorkItem workItem);
 
     /**
      * @return
      */
-    PatientResultWorkItem remove();
+    PatientResultCallWorkItem remove();
 
     /**
      *

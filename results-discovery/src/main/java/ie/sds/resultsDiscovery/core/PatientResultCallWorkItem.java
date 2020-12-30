@@ -5,7 +5,7 @@ import java.time.Instant;
 
 // todo replace with the new version in the core
 // todo before deleting: Add a constructor with a Patient parameter.
-public class PatientResultWorkItem {
+public class PatientResultCallWorkItem {
     private Instant created = Clock.systemUTC().instant();
     private Instant lastAccessed;
     private Status status = Status.TODO;
@@ -14,17 +14,17 @@ public class PatientResultWorkItem {
     private String phoneNumber;
     private TestResult result;
 
-    public PatientResultWorkItem() {
+    public PatientResultCallWorkItem() {
     }
 
-    public PatientResultWorkItem(String patientId, String name, String phoneNumber, TestResult result) {
+    public PatientResultCallWorkItem(String patientId, String name, String phoneNumber, TestResult result) {
         this.patientId = patientId;
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.result = result;
     }
 
-    public PatientResultWorkItem(Patient patient) {
+    public PatientResultCallWorkItem(Patient patient) {
         this(patient.getId(), patient.getInfo().getFirstName(), patient.getInfo().getPhoneNumber(), patient.getResult());
     }
 

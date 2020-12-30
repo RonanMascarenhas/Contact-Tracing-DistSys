@@ -1,7 +1,7 @@
 package ie.sds.resultsDiscovery.controller;
 
 import ie.sds.resultsDiscovery.core.Patient;
-import ie.sds.resultsDiscovery.core.PatientResultWorkItem;
+import ie.sds.resultsDiscovery.core.PatientResultCallWorkItem;
 import ie.sds.resultsDiscovery.service.DomainNameService;
 import ie.sds.resultsDiscovery.service.PatientResultsCallQueue;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,22 +66,22 @@ public class ResultsDiscoveryController {
     }
 
     @GetMapping("/workitem")
-    public ResponseEntity<PatientResultWorkItem> getCallPatientWorkItem() {
+    public ResponseEntity<PatientResultCallWorkItem> getCallPatientWorkItem() {
         if (callQueue.isEmpty()) {
             // todo use the constant in service.core.Name instead
             logger.info(String.format("No items in %s", "Patient_Results_Call_WorkItem_Queue"));
             return ResponseEntity.notFound().build();
         }
-        PatientResultWorkItem workItem = callQueue.remove();
+        PatientResultCallWorkItem workItem = callQueue.remove();
         logger.info("Finished in 'GET /result/workitem'");
         return ResponseEntity.ok(workItem);
     }
 
     @PostMapping("/workitem")
-    public ResponseEntity<String> editWorkItem(@RequestBody PatientResultWorkItem workItem) {
+    public ResponseEntity<String> editWorkItem(@RequestBody PatientResultCallWorkItem workItem) {
         // check workItem
         //  not done? add it back to the queue
-        if (workItem.getStatus() != PatientResultWorkItem.Status.DONE) {
+        if (workItem.getStatus() != PatientResultCallWorkItem.Status.DONE) {
             logger.info(String.format("Adding PatientResultWorkItem with id=%s back to the queue", workItem.getPatientId()));
             callQueue.addWithPriority(workItem);
         }
