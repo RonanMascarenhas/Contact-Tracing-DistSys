@@ -67,8 +67,14 @@ public class ResultsDiscoveryController {
 
     @GetMapping("/workitem")
     public ResponseEntity<PatientResultWorkItem> getCallPatientWorkItem() {
+        if (callQueue.isEmpty()) {
+            // todo use the constant in service.core.Name instead
+            logger.info(String.format("No items in %s", "Patient_Results_Call_WorkItem_Queue"));
+            return ResponseEntity.notFound().build();
+        }
         PatientResultWorkItem workItem = callQueue.remove();
-        return new ResponseEntity<>(workItem, HttpStatus.OK);
+        logger.info("Finished in 'GET /result/workitem'");
+        return ResponseEntity.ok(workItem);
     }
 
     @PostMapping("/workitem")

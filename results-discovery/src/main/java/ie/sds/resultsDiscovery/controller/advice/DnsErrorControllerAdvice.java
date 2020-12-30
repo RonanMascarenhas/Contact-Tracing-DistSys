@@ -1,4 +1,4 @@
-package ie.sds.resultsDiscovery.controller;
+package ie.sds.resultsDiscovery.controller.advice;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

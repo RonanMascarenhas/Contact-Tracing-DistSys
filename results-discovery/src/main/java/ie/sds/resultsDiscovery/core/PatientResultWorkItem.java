@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.Instant;
 
 // todo this class could be refined once we decide what we want in it.
+// todo before deleting: Add a constructor with a Patient parameter.
 public class PatientResultWorkItem {
     private Instant created = Clock.systemUTC().instant();
     private Instant lastAccessed;
@@ -22,6 +23,10 @@ public class PatientResultWorkItem {
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.result = result;
+    }
+
+    public PatientResultWorkItem(Patient patient) {
+        this(patient.getId(), patient.getInfo().getFirstName(), patient.getInfo().getPhoneNumber(), patient.getResult());
     }
 
     /**
