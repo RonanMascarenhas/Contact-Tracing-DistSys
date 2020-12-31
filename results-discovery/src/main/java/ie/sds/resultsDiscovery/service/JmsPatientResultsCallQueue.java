@@ -1,12 +1,12 @@
 package ie.sds.resultsDiscovery.service;
 
-import ie.sds.resultsDiscovery.core.Patient;
-import ie.sds.resultsDiscovery.core.PatientResultCallWorkItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.support.destination.JmsDestinationAccessor;
 import org.springframework.stereotype.Service;
+import service.core.Patient;
+import service.messages.PatientResultCallWorkItem;
 
 import javax.jms.ConnectionFactory;
 

@@ -1,7 +1,5 @@
 package ie.sds.resultsDiscovery.controller;
 
-import ie.sds.resultsDiscovery.core.Patient;
-import ie.sds.resultsDiscovery.core.PatientResultCallWorkItem;
 import ie.sds.resultsDiscovery.service.DomainNameService;
 import ie.sds.resultsDiscovery.service.PatientResultsCallQueue;
 import org.slf4j.Logger;
@@ -11,7 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import service.core.Patient;
 import service.exception.NoSuchServiceException;
+import service.messages.PatientResultCallWorkItem;
 
 import java.net.URI;
 import java.util.Objects;
@@ -52,7 +52,7 @@ public class ResultsDiscoveryController {
         // Otherwise all is well
         if (response.getStatusCode() == HttpStatus.CREATED) {
             // queue the result for a call
-            logger.info(String.format("Queueing patient %s %s for a Results Call", patient.getInfo().getFirstName(), patient.getInfo().getLastName()));
+            logger.info(String.format("Queueing patient %s %s for a Results Call", patient.getFirstName(), patient.getSurname()));
             callQueue.add(patient);
         }
 

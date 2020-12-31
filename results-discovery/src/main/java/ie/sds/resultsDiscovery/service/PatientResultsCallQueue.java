@@ -1,7 +1,7 @@
 package ie.sds.resultsDiscovery.service;
 
-import ie.sds.resultsDiscovery.core.Patient;
-import ie.sds.resultsDiscovery.core.PatientResultCallWorkItem;
+import service.core.Patient;
+import service.messages.PatientResultCallWorkItem;
 
 /**
  * A wrapper for a Message-Oriented Middleware Queue
