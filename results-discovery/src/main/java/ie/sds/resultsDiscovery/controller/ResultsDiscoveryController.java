@@ -4,6 +4,8 @@ import ie.sds.resultsDiscovery.core.Patient;
 import ie.sds.resultsDiscovery.core.PatientResultCallWorkItem;
 import ie.sds.resultsDiscovery.service.DomainNameService;
 import ie.sds.resultsDiscovery.service.PatientResultsCallQueue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,14 +15,13 @@ import service.exception.NoSuchServiceException;
 
 import java.net.URI;
 import java.util.Objects;
-import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/result")
 public class ResultsDiscoveryController {
     private final DomainNameService dns;
     private final PatientResultsCallQueue callQueue;
-    private final Logger logger = Logger.getLogger(ResultsDiscoveryController.class.getSimpleName());
+    private final Logger logger = LoggerFactory.getLogger(ResultsDiscoveryController.class);
 
     @Autowired
     public ResultsDiscoveryController(DomainNameService dns, PatientResultsCallQueue callQueue) {
@@ -44,7 +45,7 @@ public class ResultsDiscoveryController {
         //  422 => correct resource syntax, incorrect semantics
         // If there was an error
         if (statusCode >= 300) {
-            logger.warning(String.format("Service at %s returned status %d: %s", patientInfoServiceURI, statusCode, response.getBody()));
+            logger.warn(String.format("Service at %s returned status %d: %s", patientInfoServiceURI, statusCode, response.getBody()));
             return ResponseEntity.unprocessableEntity().build();
         }
 
@@ -87,6 +88,6 @@ public class ResultsDiscoveryController {
         }
 
         logger.info("Finished in 'POST /result/workitem'");
-        return ResponseEntity.accepted().build();
+        return ResponseEntity.ok().build();
     }
 }

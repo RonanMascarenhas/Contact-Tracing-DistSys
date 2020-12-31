@@ -1,11 +1,12 @@
 package ie.sds.resultsDiscovery.core;
 
+import java.io.Serializable;
 import java.time.Clock;
 import java.time.Instant;
 
 // todo replace with the new version in the core
 // todo before deleting: Add a constructor with a Patient parameter.
-public class PatientResultCallWorkItem {
+public class PatientResultCallWorkItem implements Serializable {
     private Instant created = Clock.systemUTC().instant();
     private Instant lastAccessed;
     private Status status = Status.TODO;
