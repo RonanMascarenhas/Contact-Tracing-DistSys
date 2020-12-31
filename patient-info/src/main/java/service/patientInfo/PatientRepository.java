@@ -1,9 +1,9 @@
 package service.patientInfo;
 
-import java.util.ArrayList;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.repository.query.Param;
+import service.core.Patient;
 
 @RepositoryRestResource(collectionResourceRel = "patientinfo", path = "patientinfo")
 public interface PatientRepository extends MongoRepository<Patient, String> {

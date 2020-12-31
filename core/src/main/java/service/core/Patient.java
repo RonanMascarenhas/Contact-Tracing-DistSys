@@ -1,12 +1,12 @@
-package service.patientInfo;
+package service.core;
 
-import org.springframework.data.annotation.Id;
+//import org.springframework.data.annotation.Id;
 import java.io.Serializable;
 
 
 public class Patient implements Serializable{
 
-    @Id
+//    @Id
     private String id;  //for internal use by mongodb(see https://spring.io/guides/gs/accessing-data-mongodb/#scratch)
     private String firstName;
     private String surname;

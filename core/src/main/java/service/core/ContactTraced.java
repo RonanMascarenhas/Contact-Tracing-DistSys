@@ -1,4 +1,4 @@
-package service.patientInfo;
+package service.core;
 
 public enum ContactTraced {
         YES,

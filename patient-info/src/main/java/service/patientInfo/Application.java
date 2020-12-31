@@ -8,17 +8,14 @@ Field: It is a name-value pair in a document.
 
 package service.patientInfo;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpEntity;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.concurrent.ThreadLocalRandom;
+import service.core.ContactTraced;
+import service.core.Patient;
+import service.core.Result;
 
 
 @SpringBootApplication
