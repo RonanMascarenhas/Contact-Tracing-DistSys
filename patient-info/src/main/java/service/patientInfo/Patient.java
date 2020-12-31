@@ -39,29 +39,17 @@ public class Patient implements Serializable{
 
     public void setSurname(String surname) { this.surname = surname; }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
+    public String getPhoneNumber() { return phoneNumber; }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
-    public Result getResult() {
-        return result;
-    }
+    public Result getResult() { return result; }
 
-    public void setResult(Result result) {
-        this.result = result;
-    }
+    public void setResult(Result result) { this.result = result; }
 
-    public ContactTraced getCt() {
-        return ct;
-    }
+    public ContactTraced getCt() { return ct; }
 
-    public void setCt(ContactTraced ct) {
-        this.ct = ct;
-    }
+    public void setCt(ContactTraced ct) { this.ct = ct; }
 
     @Override
     public String toString() {

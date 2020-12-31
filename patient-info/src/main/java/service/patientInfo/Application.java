@@ -31,24 +31,24 @@ public class Application {
         SpringApplication.run(Application.class, args);
 
         //    TEST DATA
-        Date d1 = new Date();
-        Date d2 = new Date();
+//        Date d1 = new Date();
+//        Date d2 = new Date();
         Patient p1 = new Patient("0", "A", "Z", "0123456789", Result.POSITIVE, ContactTraced.YES);
-        Patient p2 = new Patient("1", "B", "Y", "0123456789", Result.NEGATIVE, ContactTraced.NO);
+        Patient p2 = new Patient("1", "B", "Y", "0987654321", Result.POSITIVE, ContactTraced.NO);
 
         RestTemplate restTemplate = new RestTemplate();
         HttpEntity<Patient> request = new HttpEntity<>(p1);
         HttpEntity<Patient> request1 = new HttpEntity<>(p2);
 
-        System.out.println("APPLICATION-PASSING PATIENT TO CONTROLLER\n");
-        ResponseEntity<Patient> patientEntity = restTemplate.postForEntity("http://localhost:8080/patientinfo", request, Patient.class);
-        Patient p0 = patientEntity.getBody();
-        System.out.println("APPLICATION: PATIENT RECEIVED: " + p0.getFirstName() + p0.getSurname());
+        System.out.println("\nAPPLICATION-PASSING PATIENT TO CONTROLLER\n");
+        ResponseEntity<Patient> pEntityOne= restTemplate.postForEntity("http://localhost:8080/patientinfo", request, Patient.class);
+        Patient pResponse1 = pEntityOne.getBody();
+        System.out.println("\nAPPLICATION: PATIENT RECEIVED: " + pResponse1.getFirstName() + pResponse1.getSurname());
 
-        System.out.println("APPLICATION-PASSING PATIENT TO CONTROLLER\n");
-        ResponseEntity<Patient> patientEntity1 = restTemplate.postForEntity("http://localhost:8080/patientinfo", request1, Patient.class);
-        Patient p9 = patientEntity1.getBody();
-        System.out.println("APPLICATION: PATIENT RECEIVED: " + p9.getFirstName() + p9.getSurname());
+        System.out.println("\nAPPLICATION-PASSING PATIENT TO CONTROLLER\n");
+        ResponseEntity<Patient> pEntityTwo = restTemplate.postForEntity("http://localhost:8080/patientinfo", request1, Patient.class);
+        Patient pResponse2 = pEntityTwo.getBody();
+        System.out.println("\nAPPLICATION: PATIENT RECEIVED: " + pResponse2.getFirstName() + pResponse2.getSurname());
 
 
 //        HttpEntity<Student> body = new HttpEntity(student);
