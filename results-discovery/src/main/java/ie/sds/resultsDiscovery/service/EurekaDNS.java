@@ -1,5 +1,6 @@
 package ie.sds.resultsDiscovery.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ public class EurekaDNS implements DomainNameService {
     private final DiscoveryClient discoveryClient;
     private final Logger logger = Logger.getLogger(EurekaDNS.class.getName());
 
+    @Autowired
     public EurekaDNS(DiscoveryClient discoveryClient) {
         this.discoveryClient = discoveryClient;
     }
