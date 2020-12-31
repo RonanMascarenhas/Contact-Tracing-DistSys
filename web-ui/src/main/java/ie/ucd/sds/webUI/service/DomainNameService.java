@@ -1,10 +1,18 @@
 package ie.ucd.sds.webUI.service;
 
+import service.exception.NoSuchServiceException;
+
 import java.net.URI;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * An interface for objects that find URIs of services for clients
  */
 public interface DomainNameService {
-    URI find(String serviceName);
+    Optional<URI> find(String serviceName);
+
+    default Supplier<NoSuchServiceException> getServiceNotFoundSupplier(String serviceName) {
+        return () -> new NoSuchServiceException(serviceName);
+    }
 }

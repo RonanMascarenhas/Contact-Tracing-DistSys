@@ -3,22 +3,25 @@ package ie.ucd.sds.webUI.core;
 import java.io.Serializable;
 
 public class Patient implements Serializable {
-
-    //Rem-best practice is public fields??
+    // todo remove this once Ronan migrates to the core
+//    @Id
     private String id;  //for internal use by mongodb(see https://spring.io/guides/gs/accessing-data-mongodb/#scratch)
-
     private String firstName;
-    private String lastName;
+    private String surname;
     private String phoneNumber;
+    private Result result;
+    private ContactTraced ct;
 
     public Patient() {
     }
 
-    public Patient(String id, String firstName, String lastName, String phoneNumber) {
+    public Patient(String id, String firstName, String surname, String phoneNumber, Result result, ContactTraced ct) {
         this.id = id;
         this.firstName = firstName;
-        this.lastName = lastName;
+        this.surname = surname;
         this.phoneNumber = phoneNumber;
+        this.result = result;
+        this.ct = ct;
     }
 
     public String getId() {
@@ -37,12 +40,12 @@ public class Patient implements Serializable {
         this.firstName = firstName;
     }
 
-    public String getLastName() {
-        return lastName;
+    public String getSurname() {
+        return surname;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 
     public String getPhoneNumber() {
@@ -53,11 +56,26 @@ public class Patient implements Serializable {
         this.phoneNumber = phoneNumber;
     }
 
+    public Result getResult() {
+        return result;
+    }
+
+    public void setResult(Result result) {
+        this.result = result;
+    }
+
+    public ContactTraced getCt() {
+        return ct;
+    }
+
+    public void setCt(ContactTraced ct) {
+        this.ct = ct;
+    }
+
     @Override
     public String toString() {
         return String.format(
-                "Patient[id=%s, firstName='%s', lastName='%s', phoneNumber='%s']",
-                id, firstName, lastName, phoneNumber);
+                "Patient[id=%s, firstName=%s, surname=%s, phoneNumber=%s]",
+                id, firstName, surname, phoneNumber);
     }
-
 }

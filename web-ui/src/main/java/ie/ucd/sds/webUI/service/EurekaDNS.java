@@ -1,11 +1,13 @@
 package ie.ucd.sds.webUI.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.logging.Logger;
 
@@ -15,6 +17,7 @@ public class EurekaDNS implements DomainNameService {
     private final DiscoveryClient discoveryClient;
     private final Logger logger = Logger.getLogger(EurekaDNS.class.getName());
 
+    @Autowired
     public EurekaDNS(DiscoveryClient discoveryClient) {
         this.discoveryClient = discoveryClient;
     }
@@ -25,14 +28,16 @@ public class EurekaDNS implements DomainNameService {
     }
 
     @Override
-    public URI find(String serviceName) {
+    public Optional<URI> find(String serviceName) {
         List<ServiceInstance> serviceInstances = discoveryClient.getInstances(serviceName);
+        URI uri;
 
         if (serviceInstances.isEmpty()) {
             logger.warning(String.format("No service instances of type %s could be found.", serviceName));
-            return null;
+            uri = null;
+        } else {
+            uri = randomServiceInstance(serviceInstances).getUri();
         }
-        ServiceInstance service = randomServiceInstance(serviceInstances);
-        return service.getUri();
+        return Optional.ofNullable(uri);
     }
 }
