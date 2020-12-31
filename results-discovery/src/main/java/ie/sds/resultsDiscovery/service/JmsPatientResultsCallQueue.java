@@ -18,7 +18,7 @@ public class JmsPatientResultsCallQueue implements PatientResultsCallQueue {
     private final JmsTemplate template;
 
     @Autowired
-    public JmsPatientResultsCallQueue(@Qualifier("jmsConnectionFactory") ConnectionFactory connectionFactory) {
+    public JmsPatientResultsCallQueue(@Qualifier("activeMQConnectionFactory") ConnectionFactory connectionFactory) {
         template = new JmsTemplate(connectionFactory);
 
         // todo extract the string to core
