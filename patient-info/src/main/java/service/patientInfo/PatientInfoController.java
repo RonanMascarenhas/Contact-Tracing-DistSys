@@ -2,13 +2,16 @@ package service.patientInfo;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import service.core.Patient;
 
+import java.awt.*;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -22,28 +25,17 @@ public class PatientInfoController {
     private Patient patient;
 //    private HashMap<String, Patient> patientList = new HashMap<>();
 
-    //    CRUD - add patient to list
+//    CRUD - add patient to list. Returns 201 CREATED response with URI of new resource in header
+//    if duplicate phone numbers being added, will create new patient object using same phone number
+//    (Results Discovery service ensures no duplicate phone numbers added)
     @RequestMapping(value = "/patientinfo", method = RequestMethod.POST)
-//    @ResponseStatus(value = HttpStatus.OK)
     public ResponseEntity<Patient> addPatient(@RequestBody Patient patient) {
 
 //        patientRepo.deleteAll();
-//        System.out.println("CONTROLLER-ENTERED PATIENTINFO MAPPING" + patient.toString());
         System.out.println("\nCONTROLLER-ADD: PATIENT RECEIVED: " + patient.getFirstName() + patient.getSurname());
 
         patientRepo.save(patient);
-
 //        patientList.put(patient.getId(), patient);
-        String path = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/patientinfo/"
-                + patient.getFirstName() + patient.getSurname();
-
-//        HttpHeaders headers = new HttpHeaders();
-//        try	{
-//            headers.setLocation(new URI(path));
-//        }
-//        catch(URISyntaxException e){
-//            System.out.println("\nCONTROLLER-ADD ERROR: " + e);
-//        }
 
         System.out.println("\nCONTROLLER-ADD: Patients found with findAll():");
         System.out.println("-------------------------------");
@@ -52,46 +44,46 @@ public class PatientInfoController {
         }
         System.out.println();
 
-        /*
-        // fetch an individual patient/patients based on query
-        System.out.println("\nCONTROLLER-ADD: Patients found with findByFirstName('A'):");
-        System.out.println("--------------------------------");
-        System.out.println(patientRepo.findByFirstName("A"));
+//        DONE
+        // FIXME send something like:
+        //  return ResponseEntity.created().location(path).build()
 
-        // fetch an individual patient/patients based on query
-        System.out.println("\nCONTROLLER-ADD: Patients found with findBySurname('Y'):");
-        System.out.println("--------------------------------");
-        System.out.println(patientRepo.findBySurname("Y"));
-        */
-        return ResponseEntity.created(URI.create(path)).body(patient);
-//        return patient;
-//        return new ResponseEntity<>(quotation, headers, HttpStatus.CREATED);
-//        record.patient = patient;
-//    add patient to record, store record in db
-//        get patient object from body of REST message, store it in db
+        String path = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()+ "/patientinfo/"
+                +patient.getPhoneNumber();
+        HttpHeaders headers = new HttpHeaders();
+
+        try	{
+            headers.setLocation(new URI(path));
+        }
+        catch(URISyntaxException e){
+            System.out.println("\nCONTROLLER-ADD ERROR: " + e);
+        }
+
+        return new ResponseEntity<>(headers, HttpStatus.CREATED);
+
+        /*
+        String path = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()+ "/book/"+phone_number;
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Location", path);
+        return new ResponseEntity<>(headers, HttpStatus.NO_CONTENT);
+         */
     }
 
     //    CRUD - returns list of patients
-    //returns ALL patients (no filtered list yet)
-    @RequestMapping(value = "/patientinfo", method = RequestMethod.GET)                                //return all applications/all applications wiht given name
+    //returns 200 OK response with list of ALL patients (no filtered list yet)
+    @RequestMapping(value = "/patientinfo", method = RequestMethod.GET)
     public @ResponseBody List<Patient> getListPatients(@RequestParam(defaultValue = "") String phoneNumber)    {
         System.out.println("\nCONTROLLER-LISTPATIENTS: Outputting repo patient list");
         List<Patient> patientList = patientRepo.findAll();
-        Iterator<Patient> patientIterator = patientList.iterator();
+
+//        DONE
         // FIXME: replace with enhanced for
-        while (patientIterator.hasNext())   {
-            Patient pTemp = patientIterator.next();
-            System.out.println(pTemp.toString());
+        for (Patient p: patientList) {
+            System.out.println(p.toString());
         }
         return patientList;
 
-        /*
-        Iterator<Patient> patientIterator = patientList.iterator();
-        while (patientIterator.hasNext() == true)   {
-            Patient pTemp = patientIterator.next();
-
-        }
-
+        /*  filtered list template (optional)
         for (ClientApplication ca : applications.values()) {
             //name not given - add all entries to list
             if (name.isEmpty()) {
@@ -109,8 +101,67 @@ public class PatientInfoController {
             }
         }
         return list;
+        */
+    }
 
-         */
+    //    CRUD-returns 200 OK with specific patient based on input phone number. 404 NOT FOUND if input phone number not in repo
+    //    if duplicate phone numbers present will return first matching patient (Results Discovery service ensures no duplicate phone numbers added)
+    @RequestMapping(value="/patientinfo/{phoneNumber}", method=RequestMethod.GET)
+    @ResponseStatus(value=HttpStatus.OK)
+    public Patient getPatient(@PathVariable String phoneNumber) {
+        System.out.println("\nEntered CONTROLLER-GETPATIENT. Phone number: " + phoneNumber);
+        List<Patient> patientList = patientRepo.findAll();
+        Patient pTemp = null;
+
+//        DONE
+        // FIXME: replace with enhanced for
+        // FIXME: if the patient is not present here, the method returns the last Patient in the list
+        for (Patient p: patientList) {
+            if (p.getPhoneNumber().equals(phoneNumber))  {
+                System.out.println("CONTROLLER-GETPATIENT: found match, returning patient " + p.toString());
+                pTemp = p;
+                break;
+            }
+//            System.out.println(p.toString());
+        }
+
+        if (pTemp==null)    {
+            System.out.println("\nCONTROLLER-GETPATIENT: no matching patient found for input phone number");
+            throw new NoSuchPatientException();
+//            return null;
+        }
+        return pTemp;
+    }
+
+    //    CRUD - remove patient based on phone number. will return 204 NO CONTENT if success and 404 NOT FOUND if fail
+    //    if duplicate phone numbers present will delete first matching patient (Results Discovery service ensures no duplicate phone numbers added)
+    @RequestMapping(value="/patientinfo/{phoneNumber}", method=RequestMethod.DELETE)
+    @ResponseStatus(value=HttpStatus.NO_CONTENT)
+    public void removePatient(@PathVariable String phoneNumber) {
+        System.out.println("\nEntered CONTROLLER-REMOVE");
+
+        Patient pTemp = null;
+        try {
+            pTemp = patientRepo.findFirstByPhoneNumber(phoneNumber);
+        }
+        catch(Exception e) {
+            System.out.println("CONTROLLER-REMOVE: error " + e);
+            return;
+        }
+        if (pTemp == null) {
+            throw new NoSuchPatientException();
+        }
+
+        System.out.println("\nCONTROLLER-REMOVE: Removing patient:" + pTemp);
+        patientRepo.delete(pTemp);
+
+        System.out.println("\nCONTROLLER-REMOVE: Patients found with findAll():");
+        System.out.println("-------------------------------");
+        for (Patient p : patientRepo.findAll()) {
+            System.out.println(p);
+        }
+        System.out.println();
+
     }
 
     /*
@@ -156,75 +207,12 @@ public class PatientInfoController {
 
      */
 
-
-//CRUD-get specific patient based on input phone number.
-// returns error if more than 1 match for a phone number
-    @RequestMapping(value="/patientinfo/{phoneNumber}", method=RequestMethod.GET)
-    @ResponseStatus(value=HttpStatus.OK)
-    public Patient getPatient(@PathVariable String phoneNumber) {
-        System.out.println("\nEntered CONTROLLER-GETPATIENT. Phone number: " + phoneNumber);
-        List<Patient> patientList = patientRepo.findAll();
-        Iterator<Patient> patientIterator = patientList.iterator();
-        Patient pTemp = null;
-
-        // FIXME: replace with enhanced for
-        // FIXME: if the patient is not present here, the method returns the last Patient in the list
-        while (patientIterator.hasNext())   {
-            pTemp = patientIterator.next();
-//            System.out.println(patientIterator.next());
-//            System.out.println(pTemp.toString());
-//            System.out.println(pTemp.getPhoneNumber() + " " + phoneNumber);
-            if (pTemp.getPhoneNumber().equals(phoneNumber))  {
-                System.out.println("CONTROLLER-GETPATIENT: found match, returning patient " + pTemp.toString());
-                break;
-            }
-
-        }
-
-        if (pTemp==null)    {
-            System.out.println("\nCONTROLLER-GETPATIENT: no matching patient found for input phone number");
-            throw new NoSuchPatientException();
-//            return null;
-        }
-
-        return pTemp;
-    }
-
-    //    CRUD - remove patient based on phone number
-    //returns error if more than 1 match for a phone number
-    @RequestMapping(value="/patientinfo/{phoneNumber}", method=RequestMethod.DELETE)
-    @ResponseStatus(value=HttpStatus.NO_CONTENT)
-    public void removePatient(@PathVariable String phoneNumber) {
-        System.out.println("\nEntered CONTROLLER-REMOVE");
-
-        Patient pTemp = null;
-        try {
-            pTemp = patientRepo.findFirstByPhoneNumber(phoneNumber);
-        }
-        catch(Exception e) {
-            System.out.println("CONTROLLER-REMOVE: error " + e);
-            return;
-        }
-        if (pTemp == null) {
-            throw new NoSuchPatientException();
-        }
-
-        System.out.println("\nCONTROLLER-REMOVE: Removing patient:" + pTemp);
-        patientRepo.delete(pTemp);
-
-        System.out.println("\nCONTROLLER-REMOVE: Patients found with findAll():");
-        System.out.println("-------------------------------");
-        for (Patient p : patientRepo.findAll()) {
-            System.out.println(p);
-        }
-        System.out.println();
-
-    }
-
     // todo consider the following method:
- /*
+    /*
     @RequestMapping(value = "/patientinfo/listpatients", method = RequestMethod.GET)
-    public @ResponseBody ArrayList<Patient> listPatients(@RequestParam(name = "ct", required = false, defaultValue = "null") Boolean contactTraced) {
+    public @ResponseBody ArrayList<Patient> listPatients(
+        @RequestParam(name = "ct", required = false, defaultValue = "null") Boolean contactTraced
+        ) {
             ArrayList<Patient> patientList;
 
             if (contactTraced == null) {
@@ -238,7 +226,7 @@ public class PatientInfoController {
             }
             return patientList;
     }
-   */
+    */
 
     //Callback scheduler - return list of all patients that havent been called for contact tracing
     @RequestMapping(value = "/patientinfo/listpatients", method = RequestMethod.GET)
