@@ -164,21 +164,20 @@ public class PatientInfoController {
 
     }
 
-    /*
-//    CRUD - replace entry based on phone number
+
+//    CRUD - replace entry based on phone number.
+//    Returns 204 NO CONTENT if successful and 404 NOT FOUND if phone number not in repo
     @RequestMapping(value="/patientinfo/{phoneNumber}", method=RequestMethod.PUT)
+    @ResponseStatus(value=HttpStatus.NO_CONTENT)
     public ResponseEntity<Patient> replacePatient(@PathVariable String phoneNumber, @RequestBody Patient entry) {
-        System.out.println("\nEntered CONTROLLER-REPLACEPATIENT. Phone number: " + phoneNumber + "\nPatient: " + entry);
+        System.out.println("\nEntered CONTROLLER-REPLACEPATIENT. Phone number: " + phoneNumber + "\nPatient to put in: " + entry.toString());
         List<Patient> patientList = patientRepo.findAll();
-        Iterator<Patient> patientIterator = patientList.iterator();
         Patient pTemp = null;
 
-        while (patientIterator.hasNext())   {
-            pTemp = patientIterator.next();
-//            System.out.println(pTemp.toString());
-//            System.out.println(pTemp.getPhoneNumber() + " " + phoneNumber);
-            if (pTemp.getPhoneNumber().equals(phoneNumber))  {
-                System.out.println("CONTROLLER-REPLACEPATIENT: found match, replacing patient " + pTemp.toString());
+        for (Patient p: patientList) {
+            if (p.getPhoneNumber().equals(phoneNumber))  {
+                System.out.println("CONTROLLER-REPLACEPATIENT: found match, deleting this patient " + p.toString());
+                pTemp = p;
                 break;
             }
         }
@@ -199,13 +198,20 @@ public class PatientInfoController {
         }
         System.out.println();
 
-        String path = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()+ "/patientinfo/"+phoneNumber;
+        String path = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()+ "/patientinfo/"
+                +entry.getPhoneNumber();
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Location", path);
+
+        try	{
+            headers.setLocation(new URI(path));
+        }
+        catch(URISyntaxException e){
+            System.out.println("\nCONTROLLER-REPLACE ERROR: " + e);
+        }
+
         return new ResponseEntity<>(headers, HttpStatus.NO_CONTENT);
     }
 
-     */
 
     // todo consider the following method:
     /*
