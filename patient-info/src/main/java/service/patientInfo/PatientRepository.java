@@ -1,41 +1,20 @@
 package service.patientInfo;
 
-import java.util.ArrayList;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.repository.query.Param;
+import service.core.Patient;
 
 @RepositoryRestResource(collectionResourceRel = "patientinfo", path = "patientinfo")
-public interface PatientRepository extends MongoRepository<Patient, String>{
-    public Patient findByFirstName(String firstName);
-    public ArrayList<Patient> findByLastName(@Param("lastname") String lastName);
+public interface PatientRepository extends MongoRepository<Patient, String> {
+    Patient findFirstByFirstName(@Param("firstName") String firstName);
+    Patient findFirstBySurname(@Param("surname") String surname);
+    Patient findFirstByPhoneNumber(@Param("phoneNumber") String phoneNumber);
 
-    /*
-    //web client methods
-    public ArrayList<Patient> returnRecords(String query);
+}
 
 //    dont need these?? interface already supports CRUD- https://spring.io/guides/gs/accessing-data-mongodb/#scratch
 
-    //    db methods
-    public void addRecord(PatientRecord record);
-
-    //    can also accept Patient/PatientRecord object
-    public PatientRecord removeRecord(String query);
-
-    //    can also accept Patient/PatientRecord object
-    public PatientRecord retrieveRecord(String query);
-
-    //    can also accept Patient/PatientRecord object
-    public PatientRecord editRecord(String query);
-
-
-
-    public ArrayList<Patient> retrieveAllPositive();
-
-    //    results discovery methods
-    public PatientRecord createRecord(String testResults);
-
-    //    callback scheduler methods
-    public ArrayList<Patient> scheduleCallback();
-     */
-}
+//Use findByFirst___ instead of findBy___
+// avoids incorrectresultsizedataaccessexception when you get more than 1 match for an input phoneNumber/name
+//https://stackoverflow.com/questions/50108238/occasional-incorrectresultsizedataaccessexception-when-running-a-mongo-query
