@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import service.core.Names;
 import service.core.Patient;
 import service.exception.NoSuchServiceException;
 import service.messages.PatientResultCallWorkItem;
@@ -29,17 +30,25 @@ public class ResultsDiscoveryController {
         this.callQueue = callQueue;
     }
 
+    // FIXME addResult name makes no sense
     @PostMapping
     public ResponseEntity<String> addResult(@RequestBody Patient patient) throws NoSuchServiceException {
         // pass the result to the Patient Info Service
-        URI patientInfoServiceURI = dns.find("patient-info")
-                .orElseThrow(dns.getServiceNotFoundSupplier("patient-info"));
+        URI patientInfoServiceURI = dns.find(Names.PATIENT_INFO)
+                .orElseThrow(dns.getServiceNotFoundSupplier(Names.PATIENT_INFO));
+
+        // todo check if patient present already
+        //  if not, Post, then return 201
+        //  if so, Get, then return 200
 
         RestTemplate template = new RestTemplate();
         ResponseEntity<?> response = template.postForEntity(patientInfoServiceURI.resolve("/patientinfo"), patient, Object.class);
         int statusCode = response.getStatusCodeValue();
 
-        // todo Discuss with Ronan
+        // todo proliferate errors through the system. An error from patient-info should trickle back to the web-ui
+        //  at present, errors are mutating into other errors
+
+        // todo fix this to reflect today's conversation - check before adding
         //  200 => resource updated
         //  201 => resource created
         //  422 => correct resource syntax, incorrect semantics
@@ -56,11 +65,8 @@ public class ResultsDiscoveryController {
             callQueue.add(patient);
         }
 
-        // todo negotiate this with Ronan
-        //  Check what should be the return object
-        //  Should contain a link to new Patient object in the Service e.g. (patientinfo/{patientId}}
-        // return a link to the new PatientInfo resource (In the PatientInfoService)
         logger.info("Finished in 'POST /result'");
+        // todo rewire this to not throw an exception over the null location
         return ResponseEntity.status(response.getStatusCode())
                 .location(Objects.requireNonNull(response.getHeaders().getLocation()))
                 .build();
@@ -70,7 +76,7 @@ public class ResultsDiscoveryController {
     public ResponseEntity<PatientResultCallWorkItem> getCallPatientWorkItem() {
         if (callQueue.isEmpty()) {
             // todo use the constant in service.core.Name instead
-            logger.info(String.format("No items in %s", "Patient_Results_Call_WorkItem_Queue"));
+            logger.info(String.format("No items in %s", Names.PATIENT_RESULTS_CALL_WI_QUEUE));
             return ResponseEntity.notFound().build();
         }
         PatientResultCallWorkItem workItem = callQueue.remove();

@@ -2,14 +2,13 @@ package service.patientInfo;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import service.core.Patient;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -23,10 +22,10 @@ public class PatientInfoController {
     private Patient patient;
 //    private HashMap<String, Patient> patientList = new HashMap<>();
 
-//    CRUD - add patient to list
+    //    CRUD - add patient to list
     @RequestMapping(value = "/patientinfo", method = RequestMethod.POST)
 //    @ResponseStatus(value = HttpStatus.OK)
-    public Patient addPatient(@RequestBody Patient patient) {
+    public ResponseEntity<Patient> addPatient(@RequestBody Patient patient) {
 
 //        patientRepo.deleteAll();
 //        System.out.println("CONTROLLER-ENTERED PATIENTINFO MAPPING" + patient.toString());
@@ -35,16 +34,16 @@ public class PatientInfoController {
         patientRepo.save(patient);
 
 //        patientList.put(patient.getId(), patient);
-        String path = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()+ "/patientinfo/"
-                +patient.getFirstName()+patient.getSurname();
+        String path = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/patientinfo/"
+                + patient.getFirstName() + patient.getSurname();
 
-        HttpHeaders headers = new HttpHeaders();
-        try	{
-            headers.setLocation(new URI(path));
-        }
-        catch(URISyntaxException e){
-            System.out.println("\nCONTROLLER-ADD ERROR: " + e);
-        }
+//        HttpHeaders headers = new HttpHeaders();
+//        try	{
+//            headers.setLocation(new URI(path));
+//        }
+//        catch(URISyntaxException e){
+//            System.out.println("\nCONTROLLER-ADD ERROR: " + e);
+//        }
 
         System.out.println("\nCONTROLLER-ADD: Patients found with findAll():");
         System.out.println("-------------------------------");
@@ -64,9 +63,8 @@ public class PatientInfoController {
         System.out.println("--------------------------------");
         System.out.println(patientRepo.findBySurname("Y"));
         */
-        // FIXME send something like:
-        //  return ResponseEntity.created().location(path).build()
-        return patient;
+        return ResponseEntity.created(URI.create(path)).body(patient);
+//        return patient;
 //        return new ResponseEntity<>(quotation, headers, HttpStatus.CREATED);
 //        record.patient = patient;
 //    add patient to record, store record in db
@@ -224,11 +222,9 @@ public class PatientInfoController {
     }
 
     // todo consider the following method:
-    /*
+ /*
     @RequestMapping(value = "/patientinfo/listpatients", method = RequestMethod.GET)
-    public @ResponseBody ArrayList<Patient> listPatients(
-        @RequestParam(name = "ct", required = false, defaultValue = "null") Boolean contactTraced
-        ) {
+    public @ResponseBody ArrayList<Patient> listPatients(@RequestParam(name = "ct", required = false, defaultValue = "null") Boolean contactTraced) {
             ArrayList<Patient> patientList;
 
             if (contactTraced == null) {
@@ -242,7 +238,7 @@ public class PatientInfoController {
             }
             return patientList;
     }
-    */
+   */
 
     //Callback scheduler - return list of all patients that havent been called for contact tracing
     @RequestMapping(value = "/patientinfo/listpatients", method = RequestMethod.GET)
