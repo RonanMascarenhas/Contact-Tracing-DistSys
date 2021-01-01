@@ -170,6 +170,7 @@ public class PatientInfoController {
         Patient pTemp = null;
 
         // FIXME: replace with enhanced for
+        // FIXME: if the patient is not present here, the method returns the last Patient in the list
         while (patientIterator.hasNext())   {
             pTemp = patientIterator.next();
 //            System.out.println(patientIterator.next());
