@@ -1,24 +1,18 @@
 package service.patientInfo;
 
 
-import java.util.*;
-
-import service.core.Patient;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import service.core.Patient;
+
 import java.net.URI;
 import java.net.URISyntaxException;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 @RestController
 public class PatientInfoController {
@@ -70,7 +64,8 @@ public class PatientInfoController {
         System.out.println("--------------------------------");
         System.out.println(patientRepo.findBySurname("Y"));
         */
-
+        // FIXME send something like:
+        //  return ResponseEntity.created().location(path).build()
         return patient;
 //        return new ResponseEntity<>(quotation, headers, HttpStatus.CREATED);
 //        record.patient = patient;
@@ -85,6 +80,7 @@ public class PatientInfoController {
         System.out.println("\nCONTROLLER-LISTPATIENTS: Outputting repo patient list");
         List<Patient> patientList = patientRepo.findAll();
         Iterator<Patient> patientIterator = patientList.iterator();
+        // FIXME: replace with enhanced for
         while (patientIterator.hasNext())   {
             Patient pTemp = patientIterator.next();
             System.out.println(pTemp.toString());
@@ -173,6 +169,7 @@ public class PatientInfoController {
         Iterator<Patient> patientIterator = patientList.iterator();
         Patient pTemp = null;
 
+        // FIXME: replace with enhanced for
         while (patientIterator.hasNext())   {
             pTemp = patientIterator.next();
 //            System.out.println(patientIterator.next());
@@ -225,7 +222,26 @@ public class PatientInfoController {
 
     }
 
+    // todo consider the following method:
+    /*
+    @RequestMapping(value = "/patientinfo/listpatients", method = RequestMethod.GET)
+    public @ResponseBody ArrayList<Patient> listPatients(
+        @RequestParam(name = "ct", required = false, defaultValue = "null") Boolean contactTraced
+        ) {
+            ArrayList<Patient> patientList;
 
+            if (contactTraced == null) {
+                patientList = patientRepo.findAll();
+            } else if (contactTraced) {
+                // todo following requires new patientRepo methods
+
+                patientList = patientRepo.findAllContactTraced();
+            } else {
+                patientList = patientRepo.findAllNotContactTraced();
+            }
+            return patientList;
+    }
+    */
 
     //Callback scheduler - return list of all patients that havent been called for contact tracing
     @RequestMapping(value = "/patientinfo/listpatients", method = RequestMethod.GET)

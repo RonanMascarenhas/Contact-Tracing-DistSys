@@ -36,7 +36,7 @@ public class ResultsDiscoveryController {
                 .orElseThrow(dns.getServiceNotFoundSupplier("patient-info"));
 
         RestTemplate template = new RestTemplate();
-        ResponseEntity<?> response = template.postForEntity(patientInfoServiceURI.resolve("patientinfo"), patient, Object.class);
+        ResponseEntity<?> response = template.postForEntity(patientInfoServiceURI.resolve("/patientinfo"), patient, Object.class);
         int statusCode = response.getStatusCodeValue();
 
         // todo Discuss with Ronan
