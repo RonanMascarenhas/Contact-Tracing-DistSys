@@ -5,6 +5,7 @@ import ie.sds.resultsDiscovery.service.PatientResultsCallQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,10 +27,12 @@ public class ResultsDiscoveryController {
     private final Logger logger = LoggerFactory.getLogger(ResultsDiscoveryController.class);
 
     @Autowired
-    public ResultsDiscoveryController(DomainNameService dns, PatientResultsCallQueue callQueue) {
+    public ResultsDiscoveryController(
+            DomainNameService dns, PatientResultsCallQueue callQueue, RestTemplateBuilder templateBuilder
+    ) {
         this.dns = dns;
         this.callQueue = callQueue;
-        this.template = new RestTemplate();
+        this.template = templateBuilder.errorHandler(new RestTemplateServerErrorHandler()).build();
     }
 
     /**
@@ -40,12 +43,15 @@ public class ResultsDiscoveryController {
      * @return the refreshed {@code ResponseEntity<Patient>}
      */
     private static ResponseEntity<Patient> refreshResponseEntity(ResponseEntity<Patient> patientResponse) {
-        URI patientLocation = patientResponse.getHeaders().getLocation();
-        Objects.requireNonNull(patientLocation, "Patient location was null.");
-
-        return ResponseEntity.status(patientResponse.getStatusCode())
-                .location(patientLocation)
-                .body(patientResponse.getBody());
+        ResponseEntity.BodyBuilder builder = ResponseEntity.status(patientResponse.getStatusCode());
+        if (patientResponse.getStatusCode().is2xxSuccessful()) {
+            builder.location(
+                    Objects.requireNonNull(patientResponse.getHeaders().getLocation(),
+                            String.format("Null location from %s", Names.PATIENT_INFO)
+                    )
+            );
+        }
+        return builder.body(patientResponse.getBody());
     }
 
     private URI getPatientInfoEndpoint() throws NoSuchServiceException {
