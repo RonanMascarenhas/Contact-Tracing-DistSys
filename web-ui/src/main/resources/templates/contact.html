@@ -42,15 +42,7 @@
             <div class="col-lg-6">
                 <div class="bs-component">
                     <p>Was <span th:text="${contact.firstName}">the contact</span> successfully contacted?</p>
-                    <form action="#" th:action="@{/followup/contacttest/{id}(id=${contact.id})}" th:object="${contact}" method="post">
-                        <input type="hidden" th:field="*{firstName}" readonly>
-                        <input type="hidden" th:field="*{lastName}" readonly>
-                        <input type="hidden" th:field="*{phoneNumber}" readonly>
-                        <input type="hidden" th:field="*{id}" readonly>
-                        <input type="hidden" th:field="*{address}" readonly>
-                        <input type="hidden" th:field="*{casesList}" readonly>
-                        <input type="hidden" th:field="*{contactedDate}" readonly>
-                        <input type="hidden" th:field="*{dateOfCase}" readonly>
+                    <form action="#" th:action="@{/contacttracing/contact/{id}(id=${contact.id})}" th:object="${contact}" method="post">
                         <fieldset class="form-group">
                             <div class="form-check">
                                 <label class="form-check-label">

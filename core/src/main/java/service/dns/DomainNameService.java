@@ -1,4 +1,4 @@
-package ie.ucd.sds.webUI.service;
+package service.dns;
 
 import service.exception.NoSuchServiceException;
 
