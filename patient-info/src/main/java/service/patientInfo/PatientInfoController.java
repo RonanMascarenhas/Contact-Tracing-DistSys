@@ -34,7 +34,7 @@ public class PatientInfoController {
 //        patientRepo.deleteAll();
         System.out.println("\nCONTROLLER-ADD: PATIENT RECEIVED: " + patient.getFirstName() + patient.getSurname());
 
-//        validation check - ensure none of the fields are NULL
+//        validation check - ensure none of the fields are NULL, except for id
         if ((patient.getFirstName() == null || patient.getSurname() == null || patient.getPhoneNumber() == null || patient.getCt() == null || patient.getResult() == null)) {
             System.out.println("\nCONTROLLER-ADD: invalid input, one or more of the fields are null");
             return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
@@ -62,7 +62,7 @@ public class PatientInfoController {
             System.out.println("\nCONTROLLER-ADD ERROR: " + e);
         }
 
-        return new ResponseEntity<>(headers, HttpStatus.CREATED);
+        return new ResponseEntity<>(patient, headers, HttpStatus.CREATED);
 
         /*
         String path = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()+ "/book/"+phone_number;
