@@ -10,6 +10,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import service.core.ContactTraced;
 import service.core.Patient;
 import service.core.Result;
+import service.messages.Contact;
 
 import java.awt.*;
 import java.net.URI;
@@ -28,7 +29,6 @@ public class PatientInfoController {
 //    private HashMap<String, Patient> patientList = new HashMap<>();
 
 
-//    Validation check needed
 //    CRUD - add patient to list. Returns 201 CREATED response with URI of new resource in header
 //    if duplicate phone numbers being added, will create new patient object using same phone number
 //    (Results Discovery service ensures no duplicate phone numbers added)
@@ -219,7 +219,6 @@ public class PatientInfoController {
 
     }
 
-    //    Validation check needed
 //    CRUD - replace entry based on phone number.
 //    Returns 204 NO CONTENT if successful and 404 NOT FOUND if phone number not in repo
     @RequestMapping(value="/patientinfo/{phoneNumber}", method=RequestMethod.PUT)
@@ -274,34 +273,43 @@ public class PatientInfoController {
         return new ResponseEntity<>(headers, HttpStatus.NO_CONTENT);
     }
 
-
-    // todo consider the following method:
-    /*
+//    Returns 200 OK and list of relevant patients depending on the contactTraced parameter specified
+//    E.g. http://localhost:8082/patientinfo/listpatients?ct=NO returns list of patients with ContactTraced.NO
     @RequestMapping(value = "/patientinfo/listpatients", method = RequestMethod.GET)
-    public @ResponseBody ArrayList<Patient> listPatients(
-        @RequestParam(name = "ct", required = false, defaultValue = "null") Boolean contactTraced
-        ) {
-            ArrayList<Patient> patientList;
+    public @ResponseBody List<Patient> listPatients(
+        @RequestParam(name = "ct", required = false) ContactTraced ct) {
+        ContactTraced localct = ct;
 
-            if (contactTraced == null) {
-                patientList = patientRepo.findAll();
-            } else if (contactTraced) {
-                // todo following requires new patientRepo methods
+        System.out.println("\nEntered CONTROLLER-LISTPATIENTS. ContactTraced: " + localct);
+        List<Patient> patientList = patientRepo.findAll();
+        ArrayList<Patient> selectedPatientList = new ArrayList<>();
 
-                patientList = patientRepo.findAllContactTraced();
-            } else {
-                patientList = patientRepo.findAllNotContactTraced();
-            }
+//        no ct param specified - return ALL patients in repo
+        if (localct == null) {
+            System.out.println("CONTROLLER-LISTPATIENTS: returning all patients since param is "+localct);
             return patientList;
+        }
+//        input specifies YES contact traced, return list of all these patients
+        else if (localct==ContactTraced.YES) {
+            System.out.println("CONTROLLER-LISTPATIENTS: returning all YES contact traced patients since param is "+localct);
+            for (Patient p: patientList) {
+                if (p.getCt() == ContactTraced.YES)  {
+                    selectedPatientList.add(p);
+                }
+            }
+            return selectedPatientList;
+        }
+//        input specifies NO contact traced, return list of all these patients
+        else {
+            System.out.println("CONTROLLER-LISTPATIENTS: returning all NO contact traced patients since param is "+localct);
+            for (Patient p: patientList) {
+                if (p.getCt() == ContactTraced.NO)  {
+                    selectedPatientList.add(p);
+                }
+//            System.out.println(p.toString());
+            }
+            return selectedPatientList;
+        }
     }
-    */
-
-    //Callback scheduler - return list of all patients that havent been called for contact tracing
-    @RequestMapping(value = "/patientinfo/listpatients", method = RequestMethod.GET)
-    public @ResponseBody ArrayList<Patient> listPatients()    {
-        ArrayList<Patient> patientList = new ArrayList<>();
-//        iterate through all record in db, store relevant records in list and return to web ui
-        return patientList;
-    }
-
 }
+
