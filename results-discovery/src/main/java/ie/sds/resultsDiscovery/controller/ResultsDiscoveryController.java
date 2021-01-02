@@ -23,7 +23,7 @@ import java.util.Objects;
 public class ResultsDiscoveryController {
     private final DomainNameService dns;
     private final PatientResultsCallQueue callQueue;
-    private final RestTemplate template;
+    private final RestTemplateBuilder templateBuilder;
     private final Logger logger = LoggerFactory.getLogger(ResultsDiscoveryController.class);
 
     @Autowired
@@ -32,7 +32,11 @@ public class ResultsDiscoveryController {
     ) {
         this.dns = dns;
         this.callQueue = callQueue;
-        this.template = templateBuilder.errorHandler(new RestTemplateServerErrorHandler()).build();
+        this.templateBuilder = templateBuilder;
+    }
+
+    private RestTemplate getRestTemplate() {
+        return templateBuilder.errorHandler(new RestTemplateServerErrorHandler()).build();
     }
 
     /**
@@ -60,17 +64,20 @@ public class ResultsDiscoveryController {
         return patientInfoServiceURI.resolve("/patientinfo");
     }
 
-    private ResponseEntity<Patient> getExistingPatient(String phoneNumber) throws NoSuchServiceException {
-        URI thisPatientEndpoint = getPatientInfoEndpoint().resolve("/" + phoneNumber);
+    private ResponseEntity<Patient> getExistingPatient(String phoneNumber, RestTemplate template)
+            throws NoSuchServiceException {
+        String thisPatientEndpoint = getPatientInfoEndpoint() + "/" + phoneNumber;
         return template.getForEntity(thisPatientEndpoint, Patient.class);
     }
 
     @PostMapping
-    public ResponseEntity<Patient> addResultForPatient(@RequestBody Patient patient) throws NoSuchServiceException {
+    public ResponseEntity<Patient> addResultForPatient(@RequestBody Patient patient)
+            throws NoSuchServiceException {
         // find the patient-info service
         // check if the Patient exists already
+        RestTemplate template = getRestTemplate();
         URI patientInfoEndpoint = getPatientInfoEndpoint();
-        ResponseEntity<Patient> patientResponse = getExistingPatient(patient.getPhoneNumber());
+        ResponseEntity<Patient> patientResponse = getExistingPatient(patient.getPhoneNumber(), template);
         boolean existingPatientFound = patientResponse.getStatusCode().equals(HttpStatus.OK);
 
         // if not, add it
