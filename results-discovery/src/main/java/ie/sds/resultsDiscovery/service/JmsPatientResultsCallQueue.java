@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
+import service.core.Names;
 import service.core.Patient;
 import service.messages.PatientResultCallWorkItem;
 
@@ -18,11 +19,9 @@ public class JmsPatientResultsCallQueue implements PatientResultsCallQueue {
     private final JmsTemplate template;
 
     @Autowired
-    public JmsPatientResultsCallQueue(@Qualifier("activeMQConnectionFactory") ConnectionFactory connectionFactory) {
+    public JmsPatientResultsCallQueue(@Qualifier("jmsConnectionFactory") ConnectionFactory connectionFactory) {
         template = new JmsTemplate(connectionFactory);
-
-        // todo extract the string to core
-        template.setDefaultDestinationName("PatientResultsCallWorkItem_Queue");
+        template.setDefaultDestinationName(Names.PATIENT_RESULTS_CALL_WI_QUEUE);
         template.setReceiveTimeout(FIVE_SECOND_TIMEOUT);
     }
 
