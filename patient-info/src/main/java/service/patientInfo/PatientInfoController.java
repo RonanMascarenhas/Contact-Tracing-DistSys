@@ -147,9 +147,10 @@ public class PatientInfoController {
 
     //    CRUD-returns 200 OK with specific patient based on input phone number. 404 NOT FOUND if input phone number not in repo
     //    if duplicate phone numbers present will return first matching patient (Results Discovery service ensures no duplicate phone numbers added)
+//    also used by Contacts service to find out if a patient exists
     @RequestMapping(value="/patientinfo/{phoneNumber}", method=RequestMethod.GET)
-    @ResponseStatus(value=HttpStatus.OK)
-    public Patient getPatient(@PathVariable String phoneNumber) {
+//    @ResponseStatus(value=HttpStatus.OK)
+    public ResponseEntity<Patient> getPatient(@PathVariable String phoneNumber) {
         System.out.println("\nEntered CONTROLLER-GETPATIENT. Phone number: " + phoneNumber);
         List<Patient> patientList = patientRepo.findAll();
         Patient pTemp = null;
@@ -166,12 +167,25 @@ public class PatientInfoController {
 //            System.out.println(p.toString());
         }
 
+        String path = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()+ "/patientinfo/"
+                +phoneNumber;
+        HttpHeaders headers = new HttpHeaders();
+
+        try	{
+            headers.setLocation(new URI(path));
+        }
+        catch(URISyntaxException e){
+            System.out.println("\nCONTROLLER-ADD ERROR: " + e);
+        }
+
         if (pTemp==null)    {
             System.out.println("\nCONTROLLER-GETPATIENT: no matching patient found for input phone number");
-            throw new NoSuchPatientException();
+            return new ResponseEntity<>(headers, HttpStatus.NOT_FOUND);
+//            throw new NoSuchPatientException();
 //            return null;
         }
-        return pTemp;
+//        return pTemp;
+        return new ResponseEntity<>(pTemp, headers, HttpStatus.OK);
     }
 
     //    CRUD - remove patient based on phone number. will return 204 NO CONTENT if success and 404 NOT FOUND if fail
