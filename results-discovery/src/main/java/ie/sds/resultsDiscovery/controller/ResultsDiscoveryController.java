@@ -22,60 +22,71 @@ import java.util.Objects;
 public class ResultsDiscoveryController {
     private final DomainNameService dns;
     private final PatientResultsCallQueue callQueue;
+    private final RestTemplate template;
     private final Logger logger = LoggerFactory.getLogger(ResultsDiscoveryController.class);
 
     @Autowired
     public ResultsDiscoveryController(DomainNameService dns, PatientResultsCallQueue callQueue) {
         this.dns = dns;
         this.callQueue = callQueue;
+        this.template = new RestTemplate();
     }
 
-    // FIXME addResult name makes no sense
-    @PostMapping
-    public ResponseEntity<String> addResult(@RequestBody Patient patient) throws NoSuchServiceException {
-        // pass the result to the Patient Info Service
+    /**
+     * Takes an existing {@code ResponseEntity<Patient>}, and copies its status, location
+     * and body into a new {@code ResponseEntity<Patient>},
+     *
+     * @param patientResponse the {@code ResponseEntity<Patient>} you wish to refresh
+     * @return the refreshed {@code ResponseEntity<Patient>}
+     */
+    private static ResponseEntity<Patient> refreshResponseEntity(ResponseEntity<Patient> patientResponse) {
+        URI patientLocation = patientResponse.getHeaders().getLocation();
+        Objects.requireNonNull(patientLocation, "Patient location was null.");
+
+        return ResponseEntity.status(patientResponse.getStatusCode())
+                .location(patientLocation)
+                .body(patientResponse.getBody());
+    }
+
+    private URI getPatientInfoEndpoint() throws NoSuchServiceException {
         URI patientInfoServiceURI = dns.find(Names.PATIENT_INFO)
                 .orElseThrow(dns.getServiceNotFoundSupplier(Names.PATIENT_INFO));
+        return patientInfoServiceURI.resolve("/patientinfo");
+    }
 
-        // todo check if patient present already
-        //  if not, Post, then return 201
-        //  if so, Get, then return 200
+    private ResponseEntity<Patient> getExistingPatient(String phoneNumber) throws NoSuchServiceException {
+        URI thisPatientEndpoint = getPatientInfoEndpoint().resolve("/" + phoneNumber);
+        return template.getForEntity(thisPatientEndpoint, Patient.class);
+    }
 
-        RestTemplate template = new RestTemplate();
-        ResponseEntity<?> response = template.postForEntity(patientInfoServiceURI.resolve("/patientinfo"), patient, Object.class);
-        int statusCode = response.getStatusCodeValue();
+    @PostMapping
+    public ResponseEntity<Patient> addResultForPatient(@RequestBody Patient patient) throws NoSuchServiceException {
+        // find the patient-info service
+        // check if the Patient exists already
+        URI patientInfoEndpoint = getPatientInfoEndpoint();
+        ResponseEntity<Patient> patientResponse = getExistingPatient(patient.getPhoneNumber());
+        boolean existingPatientFound = patientResponse.getStatusCode().equals(HttpStatus.OK);
 
-        // todo proliferate errors through the system. An error from patient-info should trickle back to the web-ui
-        //  at present, errors are mutating into other errors
-
-        // todo fix this to reflect today's conversation - check before adding
-        //  200 => resource updated
-        //  201 => resource created
-        //  422 => correct resource syntax, incorrect semantics
-        // If there was an error
-        if (statusCode >= 300) {
-            logger.warn(String.format("Service at %s returned status %d: %s", patientInfoServiceURI, statusCode, response.getBody()));
-            return ResponseEntity.unprocessableEntity().build();
+        // if not, add it
+        if (!existingPatientFound) {
+            logger.debug(String.format("Adding %s to %s", patient, patientInfoEndpoint));
+            patientResponse = template.postForEntity(patientInfoEndpoint, patient, Patient.class);
         }
 
-        // Otherwise all is well
-        if (response.getStatusCode() == HttpStatus.CREATED) {
-            // queue the result for a call
-            logger.info(String.format("Queueing patient %s %s for a Results Call", patient.getFirstName(), patient.getSurname()));
-            callQueue.add(patient);
-        }
+        // Add a new CallPatientResultWorkItem to the queue
+        HttpStatus status = patientResponse.getStatusCode();
+        if (status.is2xxSuccessful()) {
+            logger.debug(String.format("Queueing %s for a Results Call", patient));
+            callQueue.add(patientResponse.getBody());
+        } else logger.warn(String.format("Service at %s returned status %s", patientInfoEndpoint, status));
 
-        logger.info("Finished in 'POST /result'");
-        // todo rewire this to not throw an exception over the null location
-        return ResponseEntity.status(response.getStatusCode())
-                .location(Objects.requireNonNull(response.getHeaders().getLocation()))
-                .build();
+        logger.debug("Finished in 'POST /result'");
+        return refreshResponseEntity(patientResponse);
     }
 
     @GetMapping("/workitem")
     public ResponseEntity<PatientResultCallWorkItem> getCallPatientWorkItem() {
         if (callQueue.isEmpty()) {
-            // todo use the constant in service.core.Name instead
             logger.info(String.format("No items in %s", Names.PATIENT_RESULTS_CALL_WI_QUEUE));
             return ResponseEntity.notFound().build();
         }
