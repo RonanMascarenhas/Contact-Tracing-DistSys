@@ -7,7 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import service.core.ContactTraced;
 import service.core.Patient;
+import service.core.Result;
 
 import java.awt.*;
 import java.net.URI;
@@ -25,6 +27,8 @@ public class PatientInfoController {
     private Patient patient;
 //    private HashMap<String, Patient> patientList = new HashMap<>();
 
+
+//    Validation check needed
 //    CRUD - add patient to list. Returns 201 CREATED response with URI of new resource in header
 //    if duplicate phone numbers being added, will create new patient object using same phone number
 //    (Results Discovery service ensures no duplicate phone numbers added)
@@ -33,6 +37,42 @@ public class PatientInfoController {
 
 //        patientRepo.deleteAll();
         System.out.println("\nCONTROLLER-ADD: PATIENT RECEIVED: " + patient.getFirstName() + patient.getSurname());
+
+//        validation check - ensure none of the fields are NULL
+        if ((patient.getFirstName() == null || patient.getSurname() == null || patient.getId() == null || patient.getPhoneNumber() == null || patient.getCt() == null || patient.getResult() == null) )   {
+            System.out.println("\nCONTROLLER-ADD: invalid input, one or more of the fields are null");
+            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+//        validation check - ensure every field is of appropriate data types
+//        NOTE-these checks dont trigger, JSON ints are automatically converted to strings.
+//        Invalid Result/ContactTraced inputs are automatically flagged as MismatchedInputException before reaching here
+        System.out.println(patient.getFirstName().getClass() + " - " + String.class);
+        if (!(patient.getFirstName().getClass().equals(String.class))) {
+            System.out.println("\nCONTROLLER-ADD: invalid data type for field firstName");
+            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        if (!(patient.getSurname() instanceof String)) {
+            System.out.println("\nCONTROLLER-ADD: invalid data type for field surname");
+            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        if (!(patient.getPhoneNumber() instanceof String)) {
+            System.out.println("\nCONTROLLER-ADD: invalid data type for field phoneNumber");
+            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        System.out.println(patient.getId().getClass() + " - " + String.class);
+        if (!(patient.getId().getClass().equals(String.class))) {
+            System.out.println("\nCONTROLLER-ADD: invalid data type for field id");
+            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        if (!(patient.getCt() instanceof ContactTraced)) {
+            System.out.println("\nCONTROLLER-ADD: invalid data type for ct");
+            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        if (!(patient.getResult() instanceof Result)) {
+            System.out.println("\nCONTROLLER-ADD: invalid data type for result");
+            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+        }
 
         patientRepo.save(patient);
 //        patientList.put(patient.getId(), patient);
@@ -68,6 +108,7 @@ public class PatientInfoController {
         return new ResponseEntity<>(headers, HttpStatus.NO_CONTENT);
          */
     }
+
 
     //    CRUD - returns list of patients
     //returns 200 OK response with list of ALL patients (no filtered list yet)
@@ -164,13 +205,20 @@ public class PatientInfoController {
 
     }
 
-
+    //    Validation check needed
 //    CRUD - replace entry based on phone number.
 //    Returns 204 NO CONTENT if successful and 404 NOT FOUND if phone number not in repo
     @RequestMapping(value="/patientinfo/{phoneNumber}", method=RequestMethod.PUT)
     @ResponseStatus(value=HttpStatus.NO_CONTENT)
     public ResponseEntity<Patient> replacePatient(@PathVariable String phoneNumber, @RequestBody Patient entry) {
         System.out.println("\nEntered CONTROLLER-REPLACEPATIENT. Phone number: " + phoneNumber + "\nPatient to put in: " + entry.toString());
+
+//        validation check - ensure none of the input fields are NULL
+        if ((entry.getFirstName() == null || entry.getSurname() == null || entry.getId() == null || entry.getPhoneNumber() == null || entry.getCt() == null || entry.getResult() == null) )   {
+            System.out.println("\nCONTROLLER-REPLACE: invalid input, one or more of the fields are null");
+            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
         List<Patient> patientList = patientRepo.findAll();
         Patient pTemp = null;
 
