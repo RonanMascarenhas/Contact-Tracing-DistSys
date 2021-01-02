@@ -1,12 +1,11 @@
 package ie.sds.resultsDiscovery.service;
 
-import ie.sds.resultsDiscovery.core.Patient;
-import ie.sds.resultsDiscovery.core.PatientResultCallWorkItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.support.destination.JmsDestinationAccessor;
 import org.springframework.stereotype.Service;
+import service.core.Patient;
+import service.messages.PatientResultCallWorkItem;
 
 import javax.jms.ConnectionFactory;
 
@@ -14,6 +13,7 @@ import javax.jms.ConnectionFactory;
 public class JmsPatientResultsCallQueue implements PatientResultsCallQueue {
     private static final int HIGH_PRIORITY = 9;
     private static final int REGULAR_PRIORITY = 4;
+    private static final long FIVE_SECOND_TIMEOUT = 5 * 1000;
 
     private final JmsTemplate template;
 
@@ -23,7 +23,7 @@ public class JmsPatientResultsCallQueue implements PatientResultsCallQueue {
 
         // todo extract the string to core
         template.setDefaultDestinationName("PatientResultsCallWorkItem_Queue");
-        template.setReceiveTimeout(JmsDestinationAccessor.RECEIVE_TIMEOUT_NO_WAIT);
+        template.setReceiveTimeout(FIVE_SECOND_TIMEOUT);
     }
 
     @Override
@@ -52,6 +52,7 @@ public class JmsPatientResultsCallQueue implements PatientResultsCallQueue {
      */
     @Override
     public PatientResultCallWorkItem remove() {
+        // todo throw an exception if there is no work item returned
         return (PatientResultCallWorkItem) template.receiveAndConvert();
     }
 
@@ -61,6 +62,7 @@ public class JmsPatientResultsCallQueue implements PatientResultsCallQueue {
         return (empty == null) ? false : empty;
     }
 
+    // todo remove notion of priority; Not working
     private void setRegularPriority() {
         if (template.getPriority() != REGULAR_PRIORITY) {
             template.setPriority(REGULAR_PRIORITY);

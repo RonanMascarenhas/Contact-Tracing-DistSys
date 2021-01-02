@@ -1,6 +1,6 @@
 package service.messages;
 
-import service.entities.Patient;
+import service.core.Patient;
 
 /**
  * A class to describe outstanding Contact Tracing Call tasks to be done.
