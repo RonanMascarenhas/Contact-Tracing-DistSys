@@ -4,7 +4,6 @@ import ie.ucd.sds.webUI.core.CallPatientWorkItem;
 import ie.ucd.sds.webUI.core.ContactTraced;
 import ie.ucd.sds.webUI.core.Patient;
 import ie.ucd.sds.webUI.core.Result;
-import ie.ucd.sds.webUI.service.DomainNameService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.RestTemplate;
+import service.dns.DomainNameService;
 import service.exception.InvalidEntityException;
 import service.exception.NoSuchServiceException;
 

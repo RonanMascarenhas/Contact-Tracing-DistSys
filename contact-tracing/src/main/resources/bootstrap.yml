@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: contact-tracing-service
+
+server:
+  port: 8083
