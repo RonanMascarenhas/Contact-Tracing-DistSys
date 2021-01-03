@@ -2,12 +2,12 @@
 spring:
   profiles: default
   application:
-    name: contract-tracing-follow-up-service
+    name: contact-tracing-service
 ---
 spring:
   profiles: docker
   application:
-    name: contract-tracing-follow-up-service
+    name: contact-tracing-service
 eureka:
   client:
     serviceUrl:
