@@ -12,7 +12,7 @@
 <!-- Form can specify complete or incomplete -->
 
 <!--Place workItem in a grid here-->
-<div class="container">
+<div class="container my-5">
   <div class="row">
     <h3>Results Call Console</h3>
   </div>
@@ -47,7 +47,7 @@
           <ul>
             <li th:each="status : ${statusValues}">
               <input class="form-check-input" th:field="*{status}" th:value="${status}" type="radio"/>
-              <label th:for="${#ids.prev('status')}" th:text="${status}"></label>
+              <label th:for="${#ids.prev('status')}" th:text="${status.readable}"></label>
             </li>
           </ul>
           <input th:field="*{patientId}" th:value="*{patientId}" type="hidden">

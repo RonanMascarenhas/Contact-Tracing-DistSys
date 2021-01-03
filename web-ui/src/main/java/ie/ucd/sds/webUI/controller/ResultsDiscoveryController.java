@@ -56,7 +56,7 @@ public class ResultsDiscoveryController {
         //        URI resultsDiscoveryUri = dns.find(RESULTS_DISCOVERY_SERVICE);
 //        RestTemplate template = new RestTemplate();
 //        CallPatientWorkItem workItem  = template.getForObject(resultsDiscoveryUri.resolve("workitem"), CallPatientWorkItem.class);
-        PatientWorkItem workItem = new PatientResultCallWorkItem(testPatient);
+        PatientResultCallWorkItem workItem = new PatientResultCallWorkItem(testPatient);
         model.addAttribute("workItem", workItem);
         model.addAttribute("statusValues", PatientWorkItem.Status.values());
 
@@ -64,7 +64,7 @@ public class ResultsDiscoveryController {
     }
 
     @PostMapping("/call")
-    public String editResultsCall(@ModelAttribute PatientWorkItem workItem, Model model) {
+    public String editResultsCall(@ModelAttribute PatientResultCallWorkItem workItem, Model model) {
 
         return "/results/call/accepted";
     }

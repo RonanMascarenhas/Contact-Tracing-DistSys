@@ -101,9 +101,8 @@ public abstract class PatientWorkItem implements Serializable {
             this.readable = readable;
         }
 
-        @Override
-        public String toString() {
-            return readable;
+        public String getReadable() {
+            return this.readable;
         }
     }
 }
