@@ -87,7 +87,7 @@ public class PatientInfoController {
         return patientList;
     }
 
-    //    CRUD-returns 200 OK with specific patient based on input phone number. 404 NOT FOUND if input phone number not in repo
+    //    CRUD-returns 200 OK with specific patient based on input phone number. 204 NO CONTENT if input phone number not in repo
     //    if duplicate phone numbers present will return first matching patient (Results Discovery service ensures no duplicate phone numbers added)
 //    also used by Contacts service to find out if a patient exists
     @RequestMapping(value="/patientinfo/{phoneNumber}", method=RequestMethod.GET)
@@ -119,7 +119,7 @@ public class PatientInfoController {
 
         if (pTemp==null)    {
             System.out.println("\nCONTROLLER-GETPATIENT: no matching patient found for input phone number");
-            return new ResponseEntity<>(headers, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(headers, HttpStatus.NO_CONTENT);
 //            throw new NoSuchPatientException();
 //            return null;
         }
