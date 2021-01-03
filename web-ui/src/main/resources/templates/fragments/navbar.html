@@ -8,7 +8,7 @@
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary" th:fragment="navbar">
-  <a class="navbar-brand" href="#">SDS Contact Tracing</a>
+  <a class="navbar-brand" href="/">SDS Contact Tracing</a>
   <button aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
           data-target="#navbarColor01" data-toggle="collapse" type="button">
     <span class="navbar-toggler-icon"></span>
@@ -16,10 +16,8 @@
 
   <div class="collapse navbar-collapse" id="navbarColor01">
     <ul class="navbar-nav mr-auto">
-      <li class="nav-item active">
-        <a class="nav-link" href="#">Home
-          <span class="sr-only">(current)</span>
-        </a>
+      <li class="nav-item">
+        <a class="nav-link" href="/">Home</a>
       </li>
       <li class="nav-item dropdown">
         <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"
@@ -35,12 +33,10 @@
       <li class="nav-item">
         <a class="nav-link" href="/contacttracing/">Contact Tracing</a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">About</a>
-      </li>
+      <!--      todo remove this sample for deployment -->
       <li class="nav-item dropdown">
         <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"
-           role="button">Dropdown</a>
+           role="button">Sample Dropdown</a>
         <div class="dropdown-menu">
           <a class="dropdown-item" href="#">Action</a>
           <a class="dropdown-item" href="#">Another action</a>

@@ -1,9 +1,5 @@
 package ie.ucd.sds.webUI.controller;
 
-import ie.ucd.sds.webUI.core.CallPatientWorkItem;
-import ie.ucd.sds.webUI.core.ContactTraced;
-import ie.ucd.sds.webUI.core.Patient;
-import ie.ucd.sds.webUI.core.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,77 +12,130 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.RestTemplate;
+import service.core.Names;
+import service.core.Patient;
+import service.core.Result;
 import service.dns.DomainNameService;
 import service.exception.InvalidEntityException;
 import service.exception.NoSuchServiceException;
+import service.messages.PatientResultCallWorkItem;
+import service.messages.PatientWorkItem;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Objects;
 
 @Controller
 @RequestMapping("/results")
 public class ResultsDiscoveryController {
-    private static final String RESULTS_DISCOVERY_SERVICE = "results-discovery";
-    private static final Patient testPatient = new Patient("22", "Harry", "Styles", "089233445", Result.POSITIVE, ContactTraced.YES);
+    // test Entities
     private final DomainNameService dns;
 
-    private static final Logger logger = LoggerFactory.getLogger(ResultsDiscoveryController.class.getSimpleName());
+    private static final Logger logger = LoggerFactory.getLogger(ResultsDiscoveryController.class);
 
     @Autowired
     public ResultsDiscoveryController(DomainNameService dns) {
         this.dns = dns;
     }
 
+    /**
+     * Simple method to ensure a patient is valid on entry to the system.
+     *
+     * @param patient The {@code Patient} to validate.
+     * @throws InvalidEntityException if the patient has a missing field and cannot be accepted.
+     */
+    private static void validatePatient(Patient patient) throws InvalidEntityException {
+        boolean patientInvalid =
+                isNullOrBlank(patient.getFirstName())
+                        || isNullOrBlank(patient.getSurname())
+                        || isNullOrBlank(patient.getPhoneNumber())
+                        || Objects.isNull(patient.getResult());
+
+        if (patientInvalid) throw new InvalidEntityException(
+                String.format("%s is invalid. Make sure all fields are filled in as appropriate", patient)
+        );
+    }
+
+    private static void validateWorkItem(PatientResultCallWorkItem workItem) throws InvalidEntityException {
+        boolean workItemInvalid =
+                isNullOrBlank(workItem.getFirstName())
+                        || isNullOrBlank(workItem.getSurname())
+                        || isNullOrBlank(workItem.getPatientId())
+                        || isNullOrBlank(workItem.getPhoneNumber())
+                        || Objects.isNull(workItem.getCreated())
+                        || Objects.isNull(workItem.getLastAccessed())
+                        || Objects.isNull(workItem.getResult())
+                        || Objects.isNull(workItem.getStatus());
+
+        if (workItemInvalid) throw new InvalidEntityException(String.format("%s is invalid.", workItem));
+    }
+
+    private static boolean isNullOrBlank(String str) {
+        return str == null || str.trim().isEmpty();
+    }
+
     @GetMapping("/")
     public String getResultIndex(Model model) {
         model.addAttribute("patient", new Patient());
+        model.addAttribute("resultsValues", Result.values());
+        model.addAttribute("resourceCreated", false);
         return "results/index";
     }
 
-    private static void validatePatient(Patient patient) throws InvalidEntityException {
-        // todo think some more about this
-        //  see if we can get a Validator into the core to share between the services
-    }
-
     @GetMapping("/call")
-    public String getResultsCall(Model model) {
-        //        URI resultsDiscoveryUri = dns.find(RESULTS_DISCOVERY_SERVICE);
-//        RestTemplate template = new RestTemplate();
-//        CallPatientWorkItem workItem  = template.getForObject(resultsDiscoveryUri.resolve("workitem"), CallPatientWorkItem.class);
-        CallPatientWorkItem workItem = new CallPatientWorkItem(testPatient);
-        model.addAttribute("workItem", workItem);
-        model.addAttribute("statuses", CallPatientWorkItem.Status.values());
+    public String getResultsCall(Model model) throws NoSuchServiceException {
+        URI resultsDiscoveryUri = dns.find(Names.RESULTS_DISCOVERY)
+                .orElseThrow(dns.getServiceNotFoundSupplier(Names.RESULTS_DISCOVERY));
+        URI workItemEndpoint = URI.create(resultsDiscoveryUri + "/results/workitem");
 
+        RestTemplate template = new RestTemplate();
+        PatientResultCallWorkItem workItem = template.getForObject(workItemEndpoint, PatientResultCallWorkItem.class);
+
+        if (Objects.isNull(workItem)) {
+            return "results/call/none";
+        }
+
+        model.addAttribute("workItem", workItem);
+        model.addAttribute("statusValues", PatientWorkItem.Status.values());
         return "/results/call/index";
     }
 
     @PostMapping("/call")
-    public String editResultsCall(@ModelAttribute CallPatientWorkItem workItem, Model model) {
+    public String editResultsCall(@ModelAttribute PatientResultCallWorkItem workItem, Model model)
+            throws InvalidEntityException, NoSuchServiceException {
+        validateWorkItem(workItem);
 
-        return "/results/call/accepted";
+        URI resultsDiscoveryUri = dns.find(Names.RESULTS_DISCOVERY)
+                .orElseThrow(dns.getServiceNotFoundSupplier(Names.RESULTS_DISCOVERY));
+        URI workItemEndpoint = URI.create(resultsDiscoveryUri + "/results/workitem");
+
+        RestTemplate template = new RestTemplate();
+        ResponseEntity<?> response = template.postForEntity(workItemEndpoint, workItem, String.class);
+
+        if (response.getStatusCode() == HttpStatus.ACCEPTED) return "/results/call/accepted";
+        // else
+        model.addAttribute("msg", "There was an error and the Work-Item was not accepted");
+        return "/problem";
     }
 
     @PostMapping("/")
-    public String addResult(@ModelAttribute Patient patient, Model model, HttpServletResponse response) throws IOException, NoSuchServiceException, InvalidEntityException {
-        // todo validate the patient
-        //  maybe handle via an exception
+    public String addResult(@ModelAttribute Patient patient, Model model, HttpServletResponse response)
+            throws IOException, NoSuchServiceException, InvalidEntityException {
         validatePatient(patient);
 
         // send it to the back-end
-        // todo check for a null URI
-        URI resultsDiscoveryUri = dns.find(RESULTS_DISCOVERY_SERVICE)
-                .orElseThrow(dns.getServiceNotFoundSupplier(RESULTS_DISCOVERY_SERVICE));
-
-        RestTemplate template = new RestTemplate();
-        ResponseEntity<String> restResponse = template.postForEntity(resultsDiscoveryUri.resolve("/results"), patient, String.class);
-        int statusCode = restResponse.getStatusCodeValue();
+        URI resultsDiscoveryUri = dns.find(Names.RESULTS_DISCOVERY)
+                .orElseThrow(dns.getServiceNotFoundSupplier(Names.RESULTS_DISCOVERY));
+        ResponseEntity<String> restResponse = new RestTemplate()
+                .postForEntity(resultsDiscoveryUri.resolve("/results"), patient, String.class);
         HttpStatus status = restResponse.getStatusCode();
 
         if (status.is2xxSuccessful()) {
             model.addAttribute("resourceLocation", restResponse.getHeaders().getLocation());
             if (status == HttpStatus.CREATED) {
                 model.addAttribute("resourceCreated", true);
+                model.addAttribute("location", restResponse.getHeaders().getLocation());
             } else if (status == HttpStatus.OK) {
                 model.addAttribute("resourceCreated", false);
             }
@@ -95,7 +144,7 @@ public class ResultsDiscoveryController {
 
         // some unknown error occurred (Not invalid Patient nor ServiceNotFound)
         String unknownErrorMessage =
-                String.format("Unknown Error. Status code %d returned from %s", statusCode, RESULTS_DISCOVERY_SERVICE);
+                String.format("Unknown Error. Status %s returned from %s", status, Names.RESULTS_DISCOVERY);
         model.addAttribute("errorMsg", unknownErrorMessage);
         logger.warn(unknownErrorMessage);
 
