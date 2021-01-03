@@ -1,15 +1,23 @@
 package ie.sds.scheduler;
 
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobInstance;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.client.RestTemplate;
 import service.core.Names;
 import service.core.Patient;
@@ -19,17 +27,45 @@ import service.messages.ContactTracingWorkItem;
 
 import javax.jms.ConnectionFactory;
 import java.net.URI;
+import java.util.List;
 
 @Configuration
 @EnableBatchProcessing
+@EnableScheduling
 public class BatchConfiguration {
-    public JobBuilderFactory jobBuilderFactory;
-    public StepBuilderFactory stepBuilderFactory;
+    public static final long DELAY = 30000;
+    public static final String JOB_NAME = "scheduleContactTracingJob";
+
+    private final JobLauncher jobLauncher;
+    private final JobBuilderFactory jobBuilderFactory;
+    private final StepBuilderFactory stepBuilderFactory;
+    private final JobExplorer jobExplorer;
+    private final JobOperator jobOperator;
+    private final ApplicationContext context;
 
     @Autowired
-    public BatchConfiguration(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory) {
+    public BatchConfiguration(
+            JobLauncher jobLauncher, JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory,
+            JobExplorer jobExplorer, JobOperator jobOperator, ApplicationContext context
+    ) {
+        this.jobLauncher = jobLauncher;
         this.jobBuilderFactory = jobBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
+        this.jobExplorer = jobExplorer;
+        this.jobOperator = jobOperator;
+        this.context = context;
+    }
+
+    @Scheduled(initialDelay = DELAY, fixedRate = DELAY)
+    public void run() throws Exception {
+        Step jobStep = context.getBean("processPatientStep", Step.class);
+
+        List<JobInstance> lastInstances = jobExplorer.getJobInstances(JOB_NAME, 0, 1);
+        if (lastInstances.isEmpty()) {
+            jobLauncher.run(scheduleJob(jobStep), new JobParameters());
+        } else {
+            jobOperator.startNextInstance(JOB_NAME);
+        }
     }
 
     @Bean
@@ -56,14 +92,14 @@ public class BatchConfiguration {
     // todo add in a JobCompletionNotificationListener (https://spring.io/guides/gs/batch-processing/)
     @Bean
     public Job scheduleJob(Step processPatient) {
-        return jobBuilderFactory.get("scheduleContactTracingJob")
+        return jobBuilderFactory.get(JOB_NAME)
                 .flow(processPatient)
                 .end()
                 .build();
     }
 
     @Bean
-    public Step processPatientStep(WorkItemQueuePusher queuePusher, RestPatientReader restPatientReader) {
+    public Step processPatientStep(RestPatientReader restPatientReader, WorkItemQueuePusher queuePusher) {
         return stepBuilderFactory.get("schedulePatient")
                 .<Patient, ContactTracingWorkItem>chunk(10)
                 .reader(restPatientReader)
