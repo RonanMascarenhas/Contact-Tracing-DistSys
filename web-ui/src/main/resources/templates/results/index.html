@@ -8,28 +8,28 @@
 <div th:replace="fragments/navbar.html :: navbar"></div>
 <!--/* START PAGE CONTENT */-->
 <div class="container my-5" th:id="add-result-form">
-  <h3>Add Result</h3>
-  <form action="#" method="post" th:action="@{/results/}" th:object="${patient}">
-    <div class="form-group form-row">
-      <div class="col-6">
-        <label class="col-form-label" for="firstName">First Name</label>
-        <input class="form-control" id="firstName" th:field="*{firstName}" type="text">
-      </div>
-    </div>
-    <div class="form-group form-row">
-      <div class="col-6">
-        <label class="col-form-label" for="lastName">Surname</label>
-        <input class="form-control" id="lastName" th:field="*{surname}" type="text">
-      </div>
-    </div>
-    <div class="form-group form-row">
-      <div class="col-6">
-        <label class="col-form-label" for="phoneNumber">Phone Number</label>
-        <input class="form-control" id="phoneNumber" th:field="*{phoneNumber}" type="text">
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-6">
+  <div class="row">
+    <div class="col-9">
+      <h3>Add Result</h3>
+      <form action="#" method="post" th:action="@{/results/}" th:object="${patient}">
+        <div class="form-group form-row">
+          <div class="col-6">
+            <label class="col-form-label" for="firstName">First Name</label>
+            <input class="form-control" id="firstName" th:field="*{firstName}" type="text">
+          </div>
+        </div>
+        <div class="form-group form-row">
+          <div class="col-6">
+            <label class="col-form-label" for="lastName">Surname</label>
+            <input class="form-control" id="lastName" th:field="*{surname}" type="text">
+          </div>
+        </div>
+        <div class="form-group form-row">
+          <div class="col-6">
+            <label class="col-form-label" for="phoneNumber">Phone Number</label>
+            <input class="form-control" id="phoneNumber" th:field="*{phoneNumber}" type="text">
+          </div>
+        </div>
         <fieldset class="form-group">
           <legend>Results Call Status</legend>
           <ul>
@@ -39,18 +39,43 @@
             </li>
           </ul>
         </fieldset>
-      </div>
-      <div class="col-1" style="margin: auto;">
-        <button class="btn btn-primary" type="submit">Submit</button>
+        <div> <!-- former div attributes: class="col-1" style="margin: auto;" -->
+          <button class="btn btn-primary" type="submit">Submit</button>
+        </div>
+        <input name="ct" type="hidden" value="NO">
+      </form>
+    </div>
+    <div class="col-3" th:if="${resourceCreated}">
+      <div aria-atomic="true" aria-live="assertive" class="toast" role="alert">
+        <div class="toast-header">
+          <strong class="mr-auto">Result Submitted</strong>
+          <small>just now</small>
+          <button aria-label="Close" class="ml-2 mb-1 close" data-dismiss="toast" type="button">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="toast-body">
+          A result was submitted for the patient at <a th:href="${location}">this location</a>.
+        </div>
       </div>
     </div>
-    <input name="ct" type="hidden" value="NO">
-  </form>
-  <!--/* todo add a toast here that shows the patient details and its new location */-->
-  <div th:if="resourceCreated"></div>
-  <!--/* END PAGE CONTENT */-->
+  </div>
+
+  <!--/* END PAGE CONTENT - toast below */-->
 </div>
 
 <div th:replace="fragments/includeScripts.html"></div>
+<!--/* todo add a toast here that shows the patient details and its new location */-->
+<div th:if="${resourceCreated}">
+  <script>
+      /* Causes the toast to show up and fade away after 'timeout' seconds */
+      let timeout = 1000 * 10;
+      let myToast = $(".toast");
+      $(document).ready(() => {
+          myToast.toast({delay: timeout});
+          myToast.toast("show")
+      });
+  </script>
+</div>
 </body>
 </html>

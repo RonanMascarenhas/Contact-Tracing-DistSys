@@ -39,13 +39,6 @@ public class ResultsDiscoveryController {
         this.dns = dns;
     }
 
-    @GetMapping("/")
-    public String getResultIndex(Model model) {
-        model.addAttribute("patient", new Patient());
-        model.addAttribute("resultsValues", Result.values());
-        return "results/index";
-    }
-
     /**
      * Simple method to ensure a patient is valid on entry to the system.
      *
@@ -82,6 +75,14 @@ public class ResultsDiscoveryController {
         return str == null || str.trim().isEmpty();
     }
 
+    @GetMapping("/")
+    public String getResultIndex(Model model) {
+        model.addAttribute("patient", new Patient());
+        model.addAttribute("resultsValues", Result.values());
+        model.addAttribute("resourceCreated", false);
+        return "results/index";
+    }
+
     @GetMapping("/call")
     public String getResultsCall(Model model) throws NoSuchServiceException {
         URI resultsDiscoveryUri = dns.find(Names.RESULTS_DISCOVERY)
@@ -90,39 +91,51 @@ public class ResultsDiscoveryController {
 
         RestTemplate template = new RestTemplate();
         PatientResultCallWorkItem workItem = template.getForObject(workItemEndpoint, PatientResultCallWorkItem.class);
+
+        if (Objects.isNull(workItem)) {
+            return "results/call/none";
+        }
+
         model.addAttribute("workItem", workItem);
         model.addAttribute("statusValues", PatientWorkItem.Status.values());
-
         return "/results/call/index";
     }
 
     @PostMapping("/call")
     public String editResultsCall(@ModelAttribute PatientResultCallWorkItem workItem, Model model)
-            throws InvalidEntityException {
+            throws InvalidEntityException, NoSuchServiceException {
         validateWorkItem(workItem);
-        return "/results/call/accepted";
+
+        URI resultsDiscoveryUri = dns.find(Names.RESULTS_DISCOVERY)
+                .orElseThrow(dns.getServiceNotFoundSupplier(Names.RESULTS_DISCOVERY));
+        URI workItemEndpoint = URI.create(resultsDiscoveryUri + "/results/workitem");
+
+        RestTemplate template = new RestTemplate();
+        ResponseEntity<?> response = template.postForEntity(workItemEndpoint, workItem, String.class);
+
+        if (response.getStatusCode() == HttpStatus.ACCEPTED) return "/results/call/accepted";
+        // else
+        model.addAttribute("msg", "There was an error and the Work-Item was not accepted");
+        return "/problem";
     }
 
     @PostMapping("/")
     public String addResult(@ModelAttribute Patient patient, Model model, HttpServletResponse response)
             throws IOException, NoSuchServiceException, InvalidEntityException {
-        // todo validate the patient
-        //  maybe handle via an exception
         validatePatient(patient);
 
         // send it to the back-end
         URI resultsDiscoveryUri = dns.find(Names.RESULTS_DISCOVERY)
                 .orElseThrow(dns.getServiceNotFoundSupplier(Names.RESULTS_DISCOVERY));
-
-        RestTemplate template = new RestTemplate();
-        ResponseEntity<String> restResponse =
-                template.postForEntity(resultsDiscoveryUri.resolve("/results"), patient, String.class);
+        ResponseEntity<String> restResponse = new RestTemplate()
+                .postForEntity(resultsDiscoveryUri.resolve("/results"), patient, String.class);
         HttpStatus status = restResponse.getStatusCode();
 
         if (status.is2xxSuccessful()) {
             model.addAttribute("resourceLocation", restResponse.getHeaders().getLocation());
             if (status == HttpStatus.CREATED) {
                 model.addAttribute("resourceCreated", true);
+                model.addAttribute("location", restResponse.getHeaders().getLocation());
             } else if (status == HttpStatus.OK) {
                 model.addAttribute("resourceCreated", false);
             }
