@@ -7,8 +7,8 @@ spring:
 spring:
   profiles: docker
   application:
-    name: contact-tracing-service
+    name: contact-tracing-followup-service
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://peer1:8761/eureka/,http://peer2:8761/eureka/,http://peer3:8761/eureka/
+      defaultZone: http://eureka1:8761/eureka/,http://eureka2:8761/eureka/

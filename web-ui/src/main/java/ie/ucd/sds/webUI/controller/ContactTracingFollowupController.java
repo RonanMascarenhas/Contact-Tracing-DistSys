@@ -1,5 +1,7 @@
 package ie.ucd.sds.webUI.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Controller;
@@ -21,17 +23,18 @@ import java.util.TimeZone;
 import static service.core.Names.CONTACT_TRACING;
 
 @Controller
-@RequestMapping(value = "/contacttracing")
-public class ContactTracingController {
+@RequestMapping(value = "/contacttracingfollowup")
+public class ContactTracingFollowupController {
 
     private EurekaDNS dns;
+    private static final Logger logger = LoggerFactory.getLogger(ContactTracingFollowupController.class.getSimpleName());
 
     @Autowired
-    public ContactTracingController(EurekaDNS dns) {
+    public ContactTracingFollowupController(EurekaDNS dns) {
         this.dns = dns;
     }
 
-    public ContactTracingController() {
+    public ContactTracingFollowupController() {
     }
 
     @GetMapping("/")
@@ -45,7 +48,7 @@ public class ContactTracingController {
         try {
             URI uri = dns.find(CONTACT_TRACING).orElseThrow(dns.getServiceNotFoundSupplier(CONTACT_TRACING));
 
-            String contactTracingURL = uri + "/contacttracingservice/contact/";
+            String contactTracingURL = uri + "/contacttracingfollowupservice/contact/";
 
             RestTemplate restTemplate = new RestTemplate();
 
@@ -54,11 +57,13 @@ public class ContactTracingController {
             if (id == null)
                 throw new NoContactsAvailableException();
         } catch (Exception e) {
+            logger.warn(String.format("Exception encountered assigning contact: %s", e.getMessage()));
             model.addAttribute("error", e.getClass().getName());
             return "contacttracingerror";
         }
 
-        return "redirect:/contacttracing/contact/" + id;
+        logger.info(String.format("Contact with ID %s allocated.", id));
+        return "redirect:/contacttracingfollowup/contact/" + id;
     }
 
     @GetMapping("/contact/{id}")
@@ -66,7 +71,7 @@ public class ContactTracingController {
         try {
             URI uri = dns.find(CONTACT_TRACING).orElseThrow(dns.getServiceNotFoundSupplier(CONTACT_TRACING));
 
-            String contactTracingURL = uri + "/contacttracingservice/contact/" + id;
+            String contactTracingURL = uri + "/contacttracingfollowupservice/contact/" + id;
 
             RestTemplate restTemplate = new RestTemplate();
             Contact contact = restTemplate.getForObject(contactTracingURL, Contact.class);
@@ -80,6 +85,8 @@ public class ContactTracingController {
             model.addAttribute("contact", contact);
 
         } catch (Exception e) {
+            logger.error(String.format("Exception encountered retrieving contact with ID %s: %s", id,
+                    e.getMessage()));
             model.addAttribute("error", e.getClass().getName());
             return "contacttracingerror";
         }
@@ -94,7 +101,7 @@ public class ContactTracingController {
         try {
             URI uri = dns.find(Names.CONTACT_TRACING).orElseThrow(dns.getServiceNotFoundSupplier(Names.CONTACT_TRACING));
 
-            String contactTracingURL = uri + "/contacttracingservice/contact/" + id;
+            String contactTracingURL = uri + "/contacttracingfollowupservice/contact/" + id;
 
             HttpEntity<Boolean> request = new HttpEntity<>(isContacted);
 
@@ -102,10 +109,12 @@ public class ContactTracingController {
             restTemplate.postForEntity(contactTracingURL, request, Contact.class);
 
         } catch (Exception e) {
+            logger.error(String.format("Error encountered sending updated contact with ID %s: %s", id, e.getMessage()));
             model.addAttribute("error", e.getClass().getName());
+            // TODO: Consider redirecting back to contact with same ID to retry sending, error message would be useful.
             return "contacttracingerror";
         }
 
-        return "redirect:/contacttracing/";
+        return "redirect:/contacttracingfollowup/";
     }
 }

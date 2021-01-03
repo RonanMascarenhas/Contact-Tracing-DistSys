@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>ie.ucd</groupId>
-	<artifactId>contact-tracing</artifactId>
+	<artifactId>contact-tracing-followup</artifactId>
 	<version>0.0.1</version>
-	<name>contact-tracing</name>
+	<name>contact-tracing-followup</name>
 	<description>Contact tracing follow-up service</description>
 
 	<properties>

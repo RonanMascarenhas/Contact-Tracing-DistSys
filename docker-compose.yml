@@ -1,15 +1,49 @@
 version: '3'
 
 services:
-  peer1:
+  # Eureka servers
+  eureka1:
     build: eureka-server
     environment:
-      SETTINGS: peer1
-  peer2:
+      SETTINGS: eureka1
+    ports:
+      - "9001:8761"
+  eureka2:
     build: eureka-server
     environment:
-      SETTINGS: peer2
-  peer3:
-    build: eureka-server
-    environment:
-      SETTINGS: peer3
+      SETTINGS: eureka2
+    ports:
+      - "9002:8761"
+
+  # Services
+  patient-info:
+    build: patient-info
+    depends_on:
+      - eureka1
+      - eureka2
+  contacts:
+    build: contacts
+    depends_on:
+      - eureka1
+      - eureka2
+  results-discovery:
+    build: results-discovery
+    depends_on:
+      - eureka1
+      - eureka2
+  contact-tracing-followup:
+    build: contact-tracing-followup
+    depends_on:
+      - eureka1
+      - eureka2
+  web-ui:
+    build: web-ui
+    depends_on:
+      - eureka1
+      - eureka2
+      - results-discovery
+      - contact-tracing-followup
+    ports:
+      - "8080:8080"
+
+# Misc (DBs, ActiveMQ)

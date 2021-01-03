@@ -13,50 +13,38 @@ eureka:
 
 ---
 spring:
-  profiles: peer1
+  profiles: eureka1
+  application:
+    name: eureka1
 server:
   port: 8761
-
 eureka:
   instance:
-    hostname: peer1
+    hostname: eureka1
   client:
     registerWithEureka: true
     fetchRegistry: true
     serviceUrl:
-      defaultZone: http://peer1:8761/eureka/,http://peer2:8761/eureka/,http://peer3:8761/eureka/
+      defaultZone: http://eureka2:8761/eureka/
   server:
     peer-node-read-timeout-ms: 60000
-
+    peer-node-connect-timeout-ms: 60000
 
 ---
 spring:
-  profiles: peer2
+  profiles: eureka2
+  application:
+    name: eureka2
 server:
   port: 8761
 eureka:
   instance:
-    hostname: peer2
+    hostname: eureka2
   client:
     registerWithEureka: true
     fetchRegistry: true
     serviceUrl:
-      defaultZone: http://peer1:8761/eureka/,http://peer2:8761/eureka/,http://peer3:8761/eureka/
+      defaultZone: http://eureka1:8761/eureka/
   server:
     peer-node-read-timeout-ms: 60000
-
----
-spring:
-  profiles: peer3
-server:
-  port: 8761
-eureka:
-  instance:
-    hostname: peer3
-  client:
-    registerWithEureka: true
-    fetchRegistry: true
-    serviceUrl:
-      defaultZone: http://peer1:8761/eureka/,http://peer2:8761/eureka/,http://peer3:8761/eureka/
-  server:
-    peer-node-read-timeout-ms: 60000
+    peer-node-connect-timeout-ms: 60000
