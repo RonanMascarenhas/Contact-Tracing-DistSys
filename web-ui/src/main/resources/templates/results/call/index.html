@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<!--/* Replace the parameter below with the page title */-->
+<div th:replace="fragments/head.html :: head ('SDS | Results Call')"></div>
+
+<body>
+<div th:replace="fragments/navbar.html :: navbar"></div>
+<!--/* BEGIN CONTENT */-->
+
+<!--Fetch a call, provide instructions for what to do, submit the work item complete form-->
+<!-- Form can specify complete or incomplete -->
+
+<!--Place workItem in a grid here-->
+<div class="container">
+  <div class="row">
+    <h3>Results Call Console</h3>
+  </div>
+  <div class="row">
+    <table class="table">
+      <thead>
+      <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Phone Number</th>
+        <th scope="col">Diagnosis</th>
+        <th scope="col">Time Created</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:object="${workItem}">
+        <td id="p-name" th:text="*{patient.firstName + ' ' + patient.lastName}"></td>
+        <td id="p-phone" th:text="*{patient.phoneNumber}"></td>
+        <td id="p-diagnosis">DIAGNOSIS HERE</td>
+        <td id="p-created" th:text="*{created}"></td>
+        <!--        todo format the time above -->
+      </tr>
+      </tbody>
+    </table>
+    <!--Form with buttons here-->
+    <div id="workitem-controls">
+      <!--      A form to edit the workItem on the page -->
+      <form action="#" method="post" th:action="@{/results/call}" th:object="${workItem}">
+        <form>
+          <fieldset class="form-group">
+            <legend>Results Call Status</legend>
+            <ul>
+              <li th:each="status : ${statuses}">
+                <input class="form-check-input" th:field="*{status}" th:value="${status}" type="radio"/>
+                <label th:for="${#ids.prev('status')}" th:text="${status}"></label>
+              </li>
+            </ul>
+            <input th:field="*{patientId}" th:value="*{patientId}" type="hidden">
+            <input th:field="*{created}" th:value="*{created}" type="hidden">
+            <input th:field="*{lastAccessed}" th:value="*{lastAccessed}" type="hidden">
+          </fieldset>
+          <button class="btn btn-primary" type="submit">Submit</button>
+        </form>
+      </form>
+    </div>
+  </div>
+</div>
+<!--/* END CONTENT */-->
+<div th:replace="fragments/includeScripts.html"></div>
+</body>
+</html>

@@ -9,14 +9,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import service.core.ContactTraced;
 import service.core.Patient;
-import service.core.Result;
-import service.messages.Contact;
 
-import java.awt.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 @RestController
@@ -38,39 +34,9 @@ public class PatientInfoController {
 //        patientRepo.deleteAll();
         System.out.println("\nCONTROLLER-ADD: PATIENT RECEIVED: " + patient.getFirstName() + patient.getSurname());
 
-//        validation check - ensure none of the fields are NULL
-        if ((patient.getFirstName() == null || patient.getSurname() == null || patient.getId() == null || patient.getPhoneNumber() == null || patient.getCt() == null || patient.getResult() == null) )   {
+//        validation check - ensure none of the fields are NULL, except for id
+        if ((patient.getFirstName() == null || patient.getSurname() == null || patient.getPhoneNumber() == null || patient.getCt() == null || patient.getResult() == null)) {
             System.out.println("\nCONTROLLER-ADD: invalid input, one or more of the fields are null");
-            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
-        }
-//        validation check - ensure every field is of appropriate data types
-//        NOTE-these checks dont trigger, JSON ints are automatically converted to strings.
-//        Invalid Result/ContactTraced inputs are automatically flagged as MismatchedInputException before reaching here
-        System.out.println(patient.getFirstName().getClass() + " - " + String.class);
-        if (!(patient.getFirstName().getClass().equals(String.class))) {
-            System.out.println("\nCONTROLLER-ADD: invalid data type for field firstName");
-            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
-        }
-        if (!(patient.getSurname() instanceof String)) {
-            System.out.println("\nCONTROLLER-ADD: invalid data type for field surname");
-            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
-        }
-        if (!(patient.getPhoneNumber() instanceof String)) {
-            System.out.println("\nCONTROLLER-ADD: invalid data type for field phoneNumber");
-            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
-        }
-
-        System.out.println(patient.getId().getClass() + " - " + String.class);
-        if (!(patient.getId().getClass().equals(String.class))) {
-            System.out.println("\nCONTROLLER-ADD: invalid data type for field id");
-            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
-        }
-        if (!(patient.getCt() instanceof ContactTraced)) {
-            System.out.println("\nCONTROLLER-ADD: invalid data type for ct");
-            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
-        }
-        if (!(patient.getResult() instanceof Result)) {
-            System.out.println("\nCONTROLLER-ADD: invalid data type for result");
             return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
@@ -84,9 +50,6 @@ public class PatientInfoController {
         }
         System.out.println();
 
-//        DONE
-        // FIXME send something like:
-        //  return ResponseEntity.created().location(path).build()
 
         String path = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()+ "/patientinfo/"
                 +patient.getPhoneNumber();
@@ -99,7 +62,7 @@ public class PatientInfoController {
             System.out.println("\nCONTROLLER-ADD ERROR: " + e);
         }
 
-        return new ResponseEntity<>(headers, HttpStatus.CREATED);
+        return new ResponseEntity<>(patient, headers, HttpStatus.CREATED);
 
         /*
         String path = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()+ "/book/"+phone_number;
@@ -111,38 +74,17 @@ public class PatientInfoController {
 
 
     //    CRUD - returns list of patients
-    //returns 200 OK response with list of ALL patients (no filtered list yet)
+    //returns 200 OK response with list of ALL patients
     @RequestMapping(value = "/patientinfo", method = RequestMethod.GET)
-    public @ResponseBody List<Patient> getListPatients(@RequestParam(defaultValue = "") String phoneNumber)    {
+    public @ResponseBody
+    List<Patient> getListPatients() {
         System.out.println("\nCONTROLLER-LISTPATIENTS: Outputting repo patient list");
         List<Patient> patientList = patientRepo.findAll();
 
-//        DONE
-        // FIXME: replace with enhanced for
-        for (Patient p: patientList) {
+        for (Patient p : patientList) {
             System.out.println(p.toString());
         }
         return patientList;
-
-        /*  filtered list template (optional)
-        for (ClientApplication ca : applications.values()) {
-            //name not given - add all entries to list
-            if (name.isEmpty()) {
-                list.add(ca);
-            }
-            else    {
-                //if name given AND it DOES match name from this application, add it to the list
-                if (ca.getInfo().getName().equals(name))   {
-                    list.add(ca);
-                }
-                //if name given AND it DOESNT match name from this application, DONT add it to the list
-                else    {
-                    continue;
-                }
-            }
-        }
-        return list;
-        */
     }
 
     //    CRUD-returns 200 OK with specific patient based on input phone number. 204 NO CONTENT if input phone number not in repo
@@ -155,9 +97,6 @@ public class PatientInfoController {
         List<Patient> patientList = patientRepo.findAll();
         Patient pTemp = null;
 
-//        DONE
-        // FIXME: replace with enhanced for
-        // FIXME: if the patient is not present here, the method returns the last Patient in the list
         for (Patient p: patientList) {
             if (p.getPhoneNumber().equals(phoneNumber))  {
                 System.out.println("CONTROLLER-GETPATIENT: found match, returning patient " + p.toString());
