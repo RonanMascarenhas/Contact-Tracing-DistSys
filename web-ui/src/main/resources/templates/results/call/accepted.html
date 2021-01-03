@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<!--/* Replace the parameter below with the page title */-->
+<div th:replace="fragments/head.html :: head ('SDS | Call Accepted')"></div>
+
+<body>
+<div th:replace="fragments/navbar.html :: navbar"></div>
+<!--/* BEGIN CONTENT */-->
+<div class="container">
+  <div class="row">
+    <h3>Call Submission Accepted</h3>
+  </div>
+  <div class="row">
+    <a class="btn btn-primary" th:href="@{/results/call}">Fetch Next Call</a>
+  </div>
+</div>
+<!--/* END CONTENT */-->
+<div th:replace="fragments/includeScripts.html"></div>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<div th:replace="fragments/head.html :: head ('SDS | Follow Up Request')"></div>
+<body>
+<div th:replace="fragments/navbar.html :: navbar"></div>
+
+<div class="container">
+    <div class="bs-docs-section">
+        <div class="row">
+            <br>
+        </div>
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="bs-component">
+                    <h3>Contact Tracing</h3>
+                    <p class="lead">This service allocates a close contact in need of being contacted as
+                    part of the contact tracing effort. The close contact's details are provided to
+                        contact them. Once an attempt has been made to inform the contact that they are a
+                        close of a person who tested positive for covid, update the attempt as successful or
+                        not.</p>
+                </div>
+                <a class="btn btn-primary" th:href="@{/contacttracing/contact}">Request follow up task.</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div th:replace="fragments/includeScripts.html"></div>
+</body>
+</html>

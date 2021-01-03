@@ -5,6 +5,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+// todo delete this for final submission
+@Deprecated
 @Controller
 public class HelloController {
     @GetMapping("/hello")
