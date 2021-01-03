@@ -39,22 +39,6 @@ public abstract class PatientWorkItem implements Serializable {
         lastAccessed = Clock.systemUTC().instant();
     }
 
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getSurname() {
-        return surname;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-
     public Instant getCreated() {
         return created;
     }
