@@ -13,15 +13,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.web.client.RestTemplate;
+import service.core.Names;
+import service.dns.DomainNameService;
+import service.exception.NoSuchServiceException;
 
 import javax.jms.ConnectionFactory;
-import java.util.Scanner;
+import java.net.URI;
 
 @Configuration
 @EnableBatchProcessing
 public class BatchConfiguration {
-    public static final String apiURLFileName = "/apiUrl.txt";
-
     public JobBuilderFactory jobBuilderFactory;
     public StepBuilderFactory stepBuilderFactory;
 
@@ -32,19 +33,12 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public RestPatientReader reader() {
-        // get the apiURL for the Patient-Info Service
-        // todo change this to get the URL from Eureka
-        //  currently fetches from a file
-        String apiUrl = "";
-        try (Scanner scan = new Scanner(apiURLFileName)) {
-            apiUrl = scan.nextLine();
-        }
-        // todo get rid of this
-        apiUrl = "http://localhost:8087/patients";
+    public RestPatientReader reader(DomainNameService dns) throws NoSuchServiceException {
+        URI patientInfoURI = dns.find(Names.PATIENT_INFO)
+                .orElseThrow(dns.getServiceNotFoundSupplier(Names.PATIENT_INFO));
 
-        // todo this should add the correct endpoint to the URL here or inside the RestPatientReader, once this is finalized
-        return new RestPatientReader(apiUrl, new RestTemplate());
+        String patientsInfoEndpoint = URI.create(patientInfoURI + "/patientinfo/listpatients?ct=false").toString();
+        return new RestPatientReader(patientsInfoEndpoint, new RestTemplate());
     }
 
     @Bean
@@ -69,10 +63,10 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public Step processPatientStep(WorkItemQueuePusher queuePusher) {
+    public Step processPatientStep(WorkItemQueuePusher queuePusher, RestPatientReader restPatientReader) {
         return stepBuilderFactory.get("schedulePatient")
                 .<Patient, CallPatientWorkItem>chunk(10)
-                .reader(reader())
+                .reader(restPatientReader)
                 .processor(processor())
                 .writer(queuePusher)
                 .build();
