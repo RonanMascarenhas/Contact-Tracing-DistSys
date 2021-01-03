@@ -1,17 +1,19 @@
 package ie.sds.resultsDiscovery.controller;
 
-import ie.sds.resultsDiscovery.core.Patient;
-import ie.sds.resultsDiscovery.core.PatientResultCallWorkItem;
 import ie.sds.resultsDiscovery.service.DomainNameService;
 import ie.sds.resultsDiscovery.service.PatientResultsCallQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import service.core.Names;
+import service.core.Patient;
 import service.exception.NoSuchServiceException;
+import service.messages.PatientResultCallWorkItem;
 
 import java.net.URI;
 import java.util.Objects;
@@ -21,56 +23,84 @@ import java.util.Objects;
 public class ResultsDiscoveryController {
     private final DomainNameService dns;
     private final PatientResultsCallQueue callQueue;
+    private final RestTemplateBuilder templateBuilder;
     private final Logger logger = LoggerFactory.getLogger(ResultsDiscoveryController.class);
 
     @Autowired
-    public ResultsDiscoveryController(DomainNameService dns, PatientResultsCallQueue callQueue) {
+    public ResultsDiscoveryController(
+            DomainNameService dns, PatientResultsCallQueue callQueue, RestTemplateBuilder templateBuilder
+    ) {
         this.dns = dns;
         this.callQueue = callQueue;
+        this.templateBuilder = templateBuilder;
+    }
+
+    private RestTemplate getRestTemplate() {
+        return templateBuilder.errorHandler(new RestTemplateServerErrorHandler()).build();
+    }
+
+    /**
+     * Takes an existing {@code ResponseEntity<Patient>}, and copies its status, location
+     * and body into a new {@code ResponseEntity<Patient>},
+     *
+     * @param patientResponse the {@code ResponseEntity<Patient>} you wish to refresh
+     * @return the refreshed {@code ResponseEntity<Patient>}
+     */
+    private static ResponseEntity<Patient> refreshResponseEntity(ResponseEntity<Patient> patientResponse) {
+        ResponseEntity.BodyBuilder builder = ResponseEntity.status(patientResponse.getStatusCode());
+        if (patientResponse.getStatusCode().is2xxSuccessful()) {
+            builder.location(
+                    Objects.requireNonNull(patientResponse.getHeaders().getLocation(),
+                            String.format("Null location from %s", Names.PATIENT_INFO)
+                    )
+            );
+        }
+        return builder.body(patientResponse.getBody());
+    }
+
+    private URI getPatientInfoEndpoint() throws NoSuchServiceException {
+        URI patientInfoServiceURI = dns.find(Names.PATIENT_INFO)
+                .orElseThrow(dns.getServiceNotFoundSupplier(Names.PATIENT_INFO));
+        return patientInfoServiceURI.resolve("/patientinfo");
+    }
+
+    private ResponseEntity<Patient> getExistingPatient(String phoneNumber, RestTemplate template)
+            throws NoSuchServiceException {
+        String thisPatientEndpoint = getPatientInfoEndpoint() + "/" + phoneNumber;
+        return template.getForEntity(thisPatientEndpoint, Patient.class);
     }
 
     @PostMapping
-    public ResponseEntity<String> addResult(@RequestBody Patient patient) throws NoSuchServiceException {
-        // pass the result to the Patient Info Service
-        URI patientInfoServiceURI = dns.find("patient-info")
-                .orElseThrow(dns.getServiceNotFoundSupplier("patient-info"));
+    public ResponseEntity<Patient> addResultForPatient(@RequestBody Patient patient)
+            throws NoSuchServiceException {
+        // find the patient-info service
+        // check if the Patient exists already
+        RestTemplate template = getRestTemplate();
+        URI patientInfoEndpoint = getPatientInfoEndpoint();
+        ResponseEntity<Patient> patientResponse = getExistingPatient(patient.getPhoneNumber(), template);
+        boolean existingPatientFound = patientResponse.getStatusCode().equals(HttpStatus.OK);
 
-        RestTemplate template = new RestTemplate();
-        ResponseEntity<?> response = template.postForEntity(patientInfoServiceURI.resolve("patientinfo"), patient, Object.class);
-        int statusCode = response.getStatusCodeValue();
-
-        // todo Discuss with Ronan
-        //  200 => resource updated
-        //  201 => resource created
-        //  422 => correct resource syntax, incorrect semantics
-        // If there was an error
-        if (statusCode >= 300) {
-            logger.warn(String.format("Service at %s returned status %d: %s", patientInfoServiceURI, statusCode, response.getBody()));
-            return ResponseEntity.unprocessableEntity().build();
+        // if not, add it
+        if (!existingPatientFound) {
+            logger.debug(String.format("Adding %s to %s", patient, patientInfoEndpoint));
+            patientResponse = template.postForEntity(patientInfoEndpoint, patient, Patient.class);
         }
 
-        // Otherwise all is well
-        if (response.getStatusCode() == HttpStatus.CREATED) {
-            // queue the result for a call
-            logger.info(String.format("Queueing patient %s %s for a Results Call", patient.getInfo().getFirstName(), patient.getInfo().getLastName()));
-            callQueue.add(patient);
-        }
+        // Add a new CallPatientResultWorkItem to the queue
+        HttpStatus status = patientResponse.getStatusCode();
+        if (status.is2xxSuccessful()) {
+            logger.debug(String.format("Queueing %s for a Results Call", patient));
+            callQueue.add(patientResponse.getBody());
+        } else logger.warn(String.format("Service at %s returned status %s", patientInfoEndpoint, status));
 
-        // todo negotiate this with Ronan
-        //  Check what should be the return object
-        //  Should contain a link to new Patient object in the Service e.g. (patientinfo/{patientId}}
-        // return a link to the new PatientInfo resource (In the PatientInfoService)
-        logger.info("Finished in 'POST /result'");
-        return ResponseEntity.status(response.getStatusCode())
-                .location(Objects.requireNonNull(response.getHeaders().getLocation()))
-                .build();
+        logger.debug("Finished in 'POST /result'");
+        return refreshResponseEntity(patientResponse);
     }
 
     @GetMapping("/workitem")
     public ResponseEntity<PatientResultCallWorkItem> getCallPatientWorkItem() {
         if (callQueue.isEmpty()) {
-            // todo use the constant in service.core.Name instead
-            logger.info(String.format("No items in %s", "Patient_Results_Call_WorkItem_Queue"));
+            logger.info(String.format("No items in %s", Names.PATIENT_RESULTS_CALL_WI_QUEUE));
             return ResponseEntity.notFound().build();
         }
         PatientResultCallWorkItem workItem = callQueue.remove();

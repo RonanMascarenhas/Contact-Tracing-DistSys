@@ -1,10 +1,10 @@
 package ie.sds.scheduler;
 
-import ie.sds.core.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.web.client.RestTemplate;
+import service.core.Patient;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -25,7 +25,7 @@ public class RestPatientReader implements ItemReader<Patient> {
     }
 
     @Override
-    public Patient read() throws Exception {
+    public Patient read() {
         if (patientDataNotInitialized()) {
             patientList = fetchPatientDataFromApi();
         }
@@ -45,7 +45,6 @@ public class RestPatientReader implements ItemReader<Patient> {
     }
 
     private List<Patient> fetchPatientDataFromApi() {
-        // todo error happens here: incorrect URL, fix this next
         Patient[] patients = restTemplate.getForObject(apiUrl, Patient[].class);
 
         if (patients == null) {

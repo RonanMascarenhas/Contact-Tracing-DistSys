@@ -19,7 +19,6 @@ public abstract class PatientWorkItem implements Serializable {
     private Result result;
 
     public PatientWorkItem(Patient patient) {
-        // todo populate the fields from the patient once the Patient class has been finalized.
         this.patientId = patient.getId();
         this.firstName = patient.getFirstName();
         this.surname = patient.getSurname();
@@ -86,6 +85,22 @@ public abstract class PatientWorkItem implements Serializable {
 
     public void setPatientId(String patientId) {
         this.patientId = patientId;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 
     public String getPhoneNumber() {
