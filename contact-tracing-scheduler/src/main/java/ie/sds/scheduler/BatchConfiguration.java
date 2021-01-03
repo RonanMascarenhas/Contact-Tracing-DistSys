@@ -1,7 +1,5 @@
 package ie.sds.scheduler;
 
-import ie.sds.core.CallPatientWorkItem;
-import ie.sds.core.Patient;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -14,8 +12,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.web.client.RestTemplate;
 import service.core.Names;
+import service.core.Patient;
 import service.dns.DomainNameService;
 import service.exception.NoSuchServiceException;
+import service.messages.ContactTracingWorkItem;
 
 import javax.jms.ConnectionFactory;
 import java.net.URI;
@@ -65,7 +65,7 @@ public class BatchConfiguration {
     @Bean
     public Step processPatientStep(WorkItemQueuePusher queuePusher, RestPatientReader restPatientReader) {
         return stepBuilderFactory.get("schedulePatient")
-                .<Patient, CallPatientWorkItem>chunk(10)
+                .<Patient, ContactTracingWorkItem>chunk(10)
                 .reader(restPatientReader)
                 .processor(processor())
                 .writer(queuePusher)

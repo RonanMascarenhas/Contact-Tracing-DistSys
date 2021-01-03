@@ -1,13 +1,13 @@
 package ie.sds.scheduler;
 
-import ie.sds.core.CallPatientWorkItem;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.jms.core.JmsTemplate;
+import service.messages.ContactTracingWorkItem;
 
 import java.util.List;
 
 
-public class WorkItemQueuePusher implements ItemWriter<CallPatientWorkItem> {
+public class WorkItemQueuePusher implements ItemWriter<ContactTracingWorkItem> {
     private final JmsTemplate template;
 
     public WorkItemQueuePusher(JmsTemplate template) {
@@ -15,8 +15,8 @@ public class WorkItemQueuePusher implements ItemWriter<CallPatientWorkItem> {
     }
 
     @Override
-    public void write(List<? extends CallPatientWorkItem> patientWorkItems) {
-        for (CallPatientWorkItem workItem : patientWorkItems) {
+    public void write(List<? extends ContactTracingWorkItem> patientWorkItems) {
+        for (ContactTracingWorkItem workItem : patientWorkItems) {
             template.convertAndSend(workItem);
         }
     }
