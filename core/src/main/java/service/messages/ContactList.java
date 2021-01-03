@@ -9,6 +9,10 @@ public class ContactList {
         this.contacts = new ArrayList<>();
     }
 
+    public ContactList(ArrayList<Contact> contacts) {
+        this.contacts = contacts;
+    }
+
     public ArrayList<Contact> getContacts() {
         return contacts;
     }

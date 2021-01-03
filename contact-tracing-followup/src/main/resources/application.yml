@@ -2,12 +2,14 @@
 spring:
   profiles: default
   application:
-    name: contact-tracing-service
+    name: contact-tracing-followup
+server:
+  port: 8083
 ---
 spring:
   profiles: docker
   application:
-    name: contact-tracing-followup-service
+    name: contact-tracing-followup
 eureka:
   client:
     serviceUrl:

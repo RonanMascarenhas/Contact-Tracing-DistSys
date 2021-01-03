@@ -21,11 +21,11 @@ services:
     depends_on:
       - eureka1
       - eureka2
-  contacts:
-    build: contacts
-    depends_on:
-      - eureka1
-      - eureka2
+#  contacts:
+#    build: contacts
+#    depends_on:
+#      - eureka1
+#      - eureka2
   results-discovery:
     build: results-discovery
     depends_on:

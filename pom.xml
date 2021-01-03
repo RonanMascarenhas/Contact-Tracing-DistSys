@@ -13,7 +13,7 @@
         <module>patient-info</module>
         <module>results-discovery</module>
         <module>contacts-discovery</module>
-<!--        <module>contacts</module>-->
+        <module>contacts</module>
         <module>contact-tracing-followup</module>
         <module>web-ui</module>
         <module>eureka-server</module>

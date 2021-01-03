@@ -119,7 +119,7 @@ public class ContactTracingFollowupServiceController {
 //        // TODO: Update CONTACT_SERVICE Constant
 //        URI uri = dns.find(CONTACT_SERVICE).orElseThrow(dns.getServiceNotFoundSupplier(CONTACT_SERVICE));
 //
-//        String contactsServiceURL = uri + "/contactTracing/{num}";
+//        String contactsServiceURL = uri + "/contacts/getOutputList/{num}";
 //
 //        ContactList contacts = restTemplate.getForObject(contactsServiceURL, ContactList.class, num);
 //
@@ -136,9 +136,8 @@ public class ContactTracingFollowupServiceController {
     public void sendUpdatedContacts() throws NoSuchServiceException {
         RestTemplate restTemplate = new RestTemplate();
 
-        // TODO: Update CONTACT_SERVICE Constant
         URI uri = dns.find(CONTACT_SERVICE).orElseThrow(dns.getServiceNotFoundSupplier(CONTACT_SERVICE));
-        String contactsServiceURL = uri + "/contactTracing/";
+        String contactsServiceURL = uri + "/contacts/returnedContacts";
 
         HttpEntity<ContactList> entity = new HttpEntity<ContactList>(updatedContacts);
         ResponseEntity<HttpStatus> response = restTemplate.exchange(contactsServiceURL, HttpMethod.PUT, entity,
