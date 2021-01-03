@@ -1,7 +1,7 @@
 package service.messages;
 
-import service.entities.Patient;
-import service.entities.TestResult;
+import service.core.Patient;
+import service.core.Result;
 
 import java.io.Serializable;
 import java.time.Clock;
@@ -13,12 +13,17 @@ public abstract class PatientWorkItem implements Serializable {
     private Status status = Status.TODO;
 
     private String patientId;
-    private String name;
+    private String firstName;
+    private String surname;
     private String phoneNumber;
-    private TestResult result;
+    private Result result;
 
     public PatientWorkItem(Patient patient) {
-        // todo populate the fields from the patient once the Patient class has been finalized.
+        this.patientId = patient.getId();
+        this.firstName = patient.getFirstName();
+        this.surname = patient.getSurname();
+        this.phoneNumber = patient.getPhoneNumber();
+        this.result = patient.getResult();
     }
 
     public PatientWorkItem() {
@@ -66,12 +71,20 @@ public abstract class PatientWorkItem implements Serializable {
         this.patientId = patientId;
     }
 
-    public String getName() {
-        return name;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 
     public String getPhoneNumber() {
@@ -82,11 +95,11 @@ public abstract class PatientWorkItem implements Serializable {
         this.phoneNumber = phoneNumber;
     }
 
-    public TestResult getResult() {
+    public Result getResult() {
         return result;
     }
 
-    public void setResult(TestResult result) {
+    public void setResult(Result result) {
         this.result = result;
     }
 
