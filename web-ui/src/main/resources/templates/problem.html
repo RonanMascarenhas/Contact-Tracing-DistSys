@@ -1,10 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Problem</title>
-</head>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<div th:replace="fragments/head.html :: head ('SDS Contact Tracing | Problem')"></div>
+
 <body>
-<p>There was a problem</p>
+<div th:replace="fragments/navbar.html :: navbar"></div>
+<!--/* BEGIN CONTENT */-->
+<div class="container">
+  <h3>
+    A problem occurred!
+  </h3>
+  <p th:text="${msg}"></p>
+</div>
+
+<!--/* END CONTENT */-->
+<div th:replace="fragments/includeScripts.html"></div>
 </body>
 </html>

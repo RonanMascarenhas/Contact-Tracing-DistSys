@@ -1,9 +1,5 @@
 package ie.ucd.sds.webUI.controller;
 
-import ie.ucd.sds.webUI.core.CallPatientWorkItem;
-import ie.ucd.sds.webUI.core.ContactTraced;
-import ie.ucd.sds.webUI.core.Patient;
-import ie.ucd.sds.webUI.core.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +12,14 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.RestTemplate;
+import service.core.ContactTraced;
+import service.core.Patient;
+import service.core.Result;
 import service.dns.DomainNameService;
 import service.exception.InvalidEntityException;
 import service.exception.NoSuchServiceException;
+import service.messages.PatientResultCallWorkItem;
+import service.messages.PatientWorkItem;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -31,7 +32,7 @@ public class ResultsDiscoveryController {
     private static final Patient testPatient = new Patient("22", "Harry", "Styles", "089233445", Result.POSITIVE, ContactTraced.YES);
     private final DomainNameService dns;
 
-    private static final Logger logger = LoggerFactory.getLogger(ResultsDiscoveryController.class.getSimpleName());
+    private static final Logger logger = LoggerFactory.getLogger(ResultsDiscoveryController.class);
 
     @Autowired
     public ResultsDiscoveryController(DomainNameService dns) {
@@ -41,6 +42,7 @@ public class ResultsDiscoveryController {
     @GetMapping("/")
     public String getResultIndex(Model model) {
         model.addAttribute("patient", new Patient());
+        model.addAttribute("resultsValues", Result.values());
         return "results/index";
     }
 
@@ -54,21 +56,22 @@ public class ResultsDiscoveryController {
         //        URI resultsDiscoveryUri = dns.find(RESULTS_DISCOVERY_SERVICE);
 //        RestTemplate template = new RestTemplate();
 //        CallPatientWorkItem workItem  = template.getForObject(resultsDiscoveryUri.resolve("workitem"), CallPatientWorkItem.class);
-        CallPatientWorkItem workItem = new CallPatientWorkItem(testPatient);
+        PatientWorkItem workItem = new PatientResultCallWorkItem(testPatient);
         model.addAttribute("workItem", workItem);
-        model.addAttribute("statuses", CallPatientWorkItem.Status.values());
+        model.addAttribute("statusValues", PatientWorkItem.Status.values());
 
         return "/results/call/index";
     }
 
     @PostMapping("/call")
-    public String editResultsCall(@ModelAttribute CallPatientWorkItem workItem, Model model) {
+    public String editResultsCall(@ModelAttribute PatientWorkItem workItem, Model model) {
 
         return "/results/call/accepted";
     }
 
     @PostMapping("/")
-    public String addResult(@ModelAttribute Patient patient, Model model, HttpServletResponse response) throws IOException, NoSuchServiceException, InvalidEntityException {
+    public String addResult(@ModelAttribute Patient patient, Model model, HttpServletResponse response)
+            throws IOException, NoSuchServiceException, InvalidEntityException {
         // todo validate the patient
         //  maybe handle via an exception
         validatePatient(patient);

@@ -7,7 +7,7 @@
 <body>
 <div th:replace="fragments/navbar.html :: navbar"></div>
 <!--/* START PAGE CONTENT */-->
-<div th:id="add-result-form">
+<div class="container" th:id="add-result-form">
   <h3>Add Result</h3>
   <form action="#" method="post" th:action="@{/results/}" th:object="${patient}">
     <div class="form-group">
@@ -15,13 +15,23 @@
       <input class="form-control" id="firstName" th:field="*{firstName}" type="text">
     </div>
     <div class="form-group">
-      <label class="col-form-label" for="lastName">Last Name</label>
-      <input class="form-control" id="lastName" th:field="*{lastName}" type="text">
+      <label class="col-form-label" for="lastName">Surname</label>
+      <input class="form-control" id="lastName" th:field="*{surname}" type="text">
     </div>
     <div class="form-group">
       <label class="col-form-label" for="phoneNumber">Phone Number</label>
       <input class="form-control" id="phoneNumber" th:field="*{phoneNumber}" type="text">
     </div>
+    <fieldset class="form-group">
+      <legend>Results Call Status</legend>
+      <ul>
+        <li th:each="result : ${resultsValues}">
+          <input class="form-check-input" th:field="*{result}" th:value="${result}" type="radio"/>
+          <label th:for="${#ids.prev('result')}" th:text="${result}"></label>
+        </li>
+      </ul>
+    </fieldset>
+    <input th:field="*{ct}" type="hidden" value="NO">
     <button class="btn btn-primary" type="submit">Submit</button>
   </form>
   <!--/* END PAGE CONTENT */-->
