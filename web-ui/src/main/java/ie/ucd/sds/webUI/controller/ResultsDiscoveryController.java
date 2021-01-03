@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.RestTemplate;
-import service.core.ContactTraced;
+import service.core.Names;
 import service.core.Patient;
 import service.core.Result;
 import service.dns.DomainNameService;
@@ -24,12 +24,12 @@ import service.messages.PatientWorkItem;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Objects;
 
 @Controller
 @RequestMapping("/results")
 public class ResultsDiscoveryController {
-    private static final String RESULTS_DISCOVERY_SERVICE = "results-discovery";
-    private static final Patient testPatient = new Patient("22", "Harry", "Styles", "089233445", Result.POSITIVE, ContactTraced.YES);
+    // test Entities
     private final DomainNameService dns;
 
     private static final Logger logger = LoggerFactory.getLogger(ResultsDiscoveryController.class);
@@ -46,17 +46,50 @@ public class ResultsDiscoveryController {
         return "results/index";
     }
 
+    /**
+     * Simple method to ensure a patient is valid on entry to the system.
+     *
+     * @param patient The {@code Patient} to validate.
+     * @throws InvalidEntityException if the patient has a missing field and cannot be accepted.
+     */
     private static void validatePatient(Patient patient) throws InvalidEntityException {
-        // todo think some more about this
-        //  see if we can get a Validator into the core to share between the services
+        boolean patientInvalid =
+                isNullOrBlank(patient.getFirstName())
+                        || isNullOrBlank(patient.getSurname())
+                        || isNullOrBlank(patient.getPhoneNumber())
+                        || Objects.isNull(patient.getResult());
+
+        if (patientInvalid) throw new InvalidEntityException(
+                String.format("%s is invalid. Make sure all fields are filled in as appropriate", patient)
+        );
+    }
+
+    private static void validateWorkItem(PatientResultCallWorkItem workItem) throws InvalidEntityException {
+        boolean workItemInvalid =
+                isNullOrBlank(workItem.getFirstName())
+                        || isNullOrBlank(workItem.getSurname())
+                        || isNullOrBlank(workItem.getPatientId())
+                        || isNullOrBlank(workItem.getPhoneNumber())
+                        || Objects.isNull(workItem.getCreated())
+                        || Objects.isNull(workItem.getLastAccessed())
+                        || Objects.isNull(workItem.getResult())
+                        || Objects.isNull(workItem.getStatus());
+
+        if (workItemInvalid) throw new InvalidEntityException(String.format("%s is invalid.", workItem));
+    }
+
+    private static boolean isNullOrBlank(String str) {
+        return str == null || str.trim().isEmpty();
     }
 
     @GetMapping("/call")
-    public String getResultsCall(Model model) {
-        //        URI resultsDiscoveryUri = dns.find(RESULTS_DISCOVERY_SERVICE);
-//        RestTemplate template = new RestTemplate();
-//        CallPatientWorkItem workItem  = template.getForObject(resultsDiscoveryUri.resolve("workitem"), CallPatientWorkItem.class);
-        PatientResultCallWorkItem workItem = new PatientResultCallWorkItem(testPatient);
+    public String getResultsCall(Model model) throws NoSuchServiceException {
+        URI resultsDiscoveryUri = dns.find(Names.RESULTS_DISCOVERY)
+                .orElseThrow(dns.getServiceNotFoundSupplier(Names.RESULTS_DISCOVERY));
+        URI workItemEndpoint = URI.create(resultsDiscoveryUri + "/results/workitem");
+
+        RestTemplate template = new RestTemplate();
+        PatientResultCallWorkItem workItem = template.getForObject(workItemEndpoint, PatientResultCallWorkItem.class);
         model.addAttribute("workItem", workItem);
         model.addAttribute("statusValues", PatientWorkItem.Status.values());
 
@@ -64,8 +97,9 @@ public class ResultsDiscoveryController {
     }
 
     @PostMapping("/call")
-    public String editResultsCall(@ModelAttribute PatientResultCallWorkItem workItem, Model model) {
-
+    public String editResultsCall(@ModelAttribute PatientResultCallWorkItem workItem, Model model)
+            throws InvalidEntityException {
+        validateWorkItem(workItem);
         return "/results/call/accepted";
     }
 
@@ -77,13 +111,12 @@ public class ResultsDiscoveryController {
         validatePatient(patient);
 
         // send it to the back-end
-        // todo check for a null URI
-        URI resultsDiscoveryUri = dns.find(RESULTS_DISCOVERY_SERVICE)
-                .orElseThrow(dns.getServiceNotFoundSupplier(RESULTS_DISCOVERY_SERVICE));
+        URI resultsDiscoveryUri = dns.find(Names.RESULTS_DISCOVERY)
+                .orElseThrow(dns.getServiceNotFoundSupplier(Names.RESULTS_DISCOVERY));
 
         RestTemplate template = new RestTemplate();
-        ResponseEntity<String> restResponse = template.postForEntity(resultsDiscoveryUri.resolve("/results"), patient, String.class);
-        int statusCode = restResponse.getStatusCodeValue();
+        ResponseEntity<String> restResponse =
+                template.postForEntity(resultsDiscoveryUri.resolve("/results"), patient, String.class);
         HttpStatus status = restResponse.getStatusCode();
 
         if (status.is2xxSuccessful()) {
@@ -98,7 +131,7 @@ public class ResultsDiscoveryController {
 
         // some unknown error occurred (Not invalid Patient nor ServiceNotFound)
         String unknownErrorMessage =
-                String.format("Unknown Error. Status code %d returned from %s", statusCode, RESULTS_DISCOVERY_SERVICE);
+                String.format("Unknown Error. Status %s returned from %s", status, Names.RESULTS_DISCOVERY);
         model.addAttribute("errorMsg", unknownErrorMessage);
         logger.warn(unknownErrorMessage);
 

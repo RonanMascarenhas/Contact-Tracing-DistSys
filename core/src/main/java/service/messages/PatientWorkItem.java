@@ -13,12 +13,18 @@ public abstract class PatientWorkItem implements Serializable {
     private Status status = Status.TODO;
 
     private String patientId;
-    private String name;
+    private String firstName;
+    private String surname;
     private String phoneNumber;
     private Result result;
 
     public PatientWorkItem(Patient patient) {
         // todo populate the fields from the patient once the Patient class has been finalized.
+        this.patientId = patient.getId();
+        this.firstName = patient.getFirstName();
+        this.surname = patient.getSurname();
+        this.phoneNumber = patient.getPhoneNumber();
+        this.result = patient.getResult();
     }
 
     public PatientWorkItem() {
@@ -32,6 +38,22 @@ public abstract class PatientWorkItem implements Serializable {
     public void updateStatus(Status status) {
         this.status = status;
         lastAccessed = Clock.systemUTC().instant();
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 
     public Instant getCreated() {
@@ -64,14 +86,6 @@ public abstract class PatientWorkItem implements Serializable {
 
     public void setPatientId(String patientId) {
         this.patientId = patientId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getPhoneNumber() {

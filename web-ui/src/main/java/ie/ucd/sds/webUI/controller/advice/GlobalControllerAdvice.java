@@ -11,12 +11,14 @@ public class GlobalControllerAdvice {
     // todo implement correct handling
 
     @ExceptionHandler(NoSuchServiceException.class)
-    public String handleMissingService(Model model) {
-        model.addAttribute("msg", "A back-end service is offline. Please wait and try again.");
+    public String handleMissingService(NoSuchServiceException ex, Model model) {
+        model.addAttribute("msg", ex.getMessage());
         return "/problem";
     }
 
     @ExceptionHandler(InvalidEntityException.class)
-    public void handleMalformedEntity() {
+    public String handleMalformedEntity(InvalidEntityException ex, Model model) {
+        model.addAttribute("msg", ex.getMessage());
+        return "/problem";
     }
 }

@@ -21,7 +21,8 @@
       <thead>
       <tr>
         <th scope="col">Time Created</th>
-        <th scope="col">Name</th>
+        <th scope="col">First Name</th>
+        <th scope="col">Surname</th>
         <th scope="col">Phone Number</th>
         <th scope="col">Result</th>
         <th scope="col">Last Modified</th>
@@ -30,7 +31,8 @@
       <tbody>
       <tr th:object="${workItem}">
         <td id="p-created" th:text="*{created}">CREATED</td>
-        <td id="p-name" th:text="*{name}">NAME</td>
+        <td id="p-fname" th:text="*{firstName}">NAME</td>
+        <td id="p-sname" th:text="*{surname}">NAME</td>
         <td id="p-phone" th:text="*{phoneNumber}">PHONE_NUMBER</td>
         <td id="p-result" th:text="*{result}">RESULT</td>
         <td id="p-lastAccessed" th:text="*{lastAccessed}">LAST_ACCESSED</td>
