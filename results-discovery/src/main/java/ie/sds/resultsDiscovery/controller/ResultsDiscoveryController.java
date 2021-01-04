@@ -114,7 +114,7 @@ public class ResultsDiscoveryController {
         //  not done? add it back to the queue
         if (workItem.getStatus() != PatientResultCallWorkItem.Status.DONE) {
             logger.info(String.format("Adding PatientResultWorkItem with id=%s back to the queue", workItem.getPatientId()));
-            callQueue.addWithPriority(workItem);
+            callQueue.add(workItem);
         }
 
         logger.info("Finished in 'POST /result/workitem'");
