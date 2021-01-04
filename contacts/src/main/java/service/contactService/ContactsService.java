@@ -28,11 +28,16 @@ public class ContactsService {
 
     @Autowired
     private ContactRepository contactRepo;
-    
+
     ArrayList<Contact> toBeContacted = new ArrayList<Contact>();
     HashMap<String, Contact> dupeCheck = new HashMap<String, Contact>();
 
-    @RequestMapping
+    @Autowired
+    public ContactsService(){
+
+    }
+
+
     public void contactDetailsReceived(ContactList contactArray){
         //TODO: Link with Husni's service
         /*
@@ -93,23 +98,14 @@ public class ContactsService {
 
     //TODO: trigger this periodically
     //TODO: REST Triggers
+    @RequestMapping(value = "/contacts/contactRetry", method = RequestMethod.PUT)
     public void contactRetry(){
         List<Contact> dbList = contactRepo.findAll();
         long currentTime = Instant.now().getEpochSecond();
         // day in seconds 86400
-        // TODO: change to days
-
         for (Contact c : dbList){
-            if(!c.isContactedStatus() && !dupeCheck.containsKey(c.getPhoneNumber())){
-                if(c.getContactAttempts() == 1 && (c.getContactedDate()+561600)<currentTime && currentTime<(c.getContactedDate()+648000)){
-                    toBeContacted.add(c);
-                    dupeCheck.put(c.getPhoneNumber(), c);
-                }
-                if(c.getContactAttempts() == 2 && (c.getContactedDate()+1166400)<currentTime && currentTime<(c.getContactedDate()+1252800)){
-                    toBeContacted.add(c);
-                    dupeCheck.put(c.getPhoneNumber(), c);
-                }
-                if(c.getContactAttempts() == 3 && (c.getContactedDate()+1771200)<currentTime && currentTime<(c.getContactedDate()+1857600)){
+            if( !c.isContactedStatus() && !dupeCheck.containsKey(c.getPhoneNumber())) {
+                if ( (c.getContactAttempts() < 3) && ((currentTime < c.getContactedDate()+86400))) {
                     toBeContacted.add(c);
                     dupeCheck.put(c.getPhoneNumber(), c);
                 }
@@ -171,7 +167,6 @@ public class ContactsService {
     @PutMapping("/contacts/returnedContacts")
     public ResponseEntity<String> receiveContactedContacts(@RequestBody ContactList contacts) {
         processContacts(contacts);
-
         return new ResponseEntity<String>(HttpStatus.OK);
     }
 
@@ -184,7 +179,7 @@ public class ContactsService {
     @RequestMapping(value = "/contacts/test", method = RequestMethod.GET)
     public void test(){
         Contact c1 = new Contact("Finn", "O'Neill", "0000", "abd", "123456");
-        Contact c2 = new Contact("Jim", "ahern", "1111", "xyz", "123456");
+        Contact c2 = new Contact("Jim", "Ahern", "1111", "xyz", "123456");
         ContactList testList = new ContactList();
         testList.addContact(c1);
         testList.addContact(c2);
