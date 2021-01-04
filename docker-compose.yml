@@ -39,10 +39,18 @@ services:
       - mongoDB
   contacts:
     build: contacts
+    image: "contacts:latest"
     depends_on:
       - eureka1
       - eureka2
       - mongoDB
+  contact-tracing-scheduler:
+    build: contact-tracing-scheduler
+    image: "contact-tracing-scheduler:latest"
+    depends_on:
+      - eureka1
+      - eureka2
+      - activeMQ
   results-discovery:
     build: results-discovery
     image: "results-discovery:latest"
@@ -58,7 +66,7 @@ services:
     depends_on:
       - eureka1
       - eureka2
-#      - contacts
+      - contacts
   web-ui:
     build: web-ui
     image: "web-ui:latest"
