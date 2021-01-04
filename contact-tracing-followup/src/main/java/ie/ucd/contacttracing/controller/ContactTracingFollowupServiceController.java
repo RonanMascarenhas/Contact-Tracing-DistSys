@@ -111,7 +111,7 @@ public class ContactTracingFollowupServiceController {
 
         URI uri = dns.find(CONTACT_SERVICE).orElseThrow(dns.getServiceNotFoundSupplier(CONTACT_SERVICE));
 
-        String contactsServiceURL = String.format("%s/contacts/getOutputList/{num}", uri);
+        String contactsServiceURL = String.format("%s/contacts/outputList/{num}", uri);
 
         ContactList contacts = restTemplate.getForObject(contactsServiceURL, ContactList.class, num);
 

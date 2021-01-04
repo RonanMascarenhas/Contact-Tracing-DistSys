@@ -37,6 +37,8 @@ services:
       - eureka1
       - eureka2
       - mongoDB
+    ports:
+      - "8082:8082"
   contacts:
     build: contacts
     image: "contacts:latest"
