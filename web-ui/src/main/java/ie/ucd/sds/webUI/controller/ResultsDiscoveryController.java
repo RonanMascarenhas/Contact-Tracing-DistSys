@@ -87,7 +87,7 @@ public class ResultsDiscoveryController {
     public String getResultsCall(Model model) throws NoSuchServiceException {
         URI resultsDiscoveryUri = dns.find(Names.RESULTS_DISCOVERY)
                 .orElseThrow(dns.getServiceNotFoundSupplier(Names.RESULTS_DISCOVERY));
-        URI workItemEndpoint = URI.create(resultsDiscoveryUri + "/results/workitem");
+        URI workItemEndpoint = URI.create(resultsDiscoveryUri + "/result/workitem");
 
         RestTemplate template = new RestTemplate();
         PatientResultCallWorkItem workItem = template.getForObject(workItemEndpoint, PatientResultCallWorkItem.class);
@@ -108,12 +108,12 @@ public class ResultsDiscoveryController {
 
         URI resultsDiscoveryUri = dns.find(Names.RESULTS_DISCOVERY)
                 .orElseThrow(dns.getServiceNotFoundSupplier(Names.RESULTS_DISCOVERY));
-        URI workItemEndpoint = URI.create(resultsDiscoveryUri + "/results/workitem");
+        URI workItemEndpoint = URI.create(resultsDiscoveryUri + "/result/workitem");
 
         RestTemplate template = new RestTemplate();
         ResponseEntity<?> response = template.postForEntity(workItemEndpoint, workItem, String.class);
 
-        if (response.getStatusCode() == HttpStatus.ACCEPTED) return "/results/call/accepted";
+        if (response.getStatusCode() == HttpStatus.OK) return "/results/call/accepted";
         // else
         model.addAttribute("msg", "There was an error and the Work-Item was not accepted");
         return "/problem";
@@ -127,19 +127,21 @@ public class ResultsDiscoveryController {
         // send it to the back-end
         URI resultsDiscoveryUri = dns.find(Names.RESULTS_DISCOVERY)
                 .orElseThrow(dns.getServiceNotFoundSupplier(Names.RESULTS_DISCOVERY));
-        ResponseEntity<String> restResponse = new RestTemplate()
-                .postForEntity(resultsDiscoveryUri.resolve("/results"), patient, String.class);
+        URI resultsEndpoint = URI.create(resultsDiscoveryUri + "/result");
+        ResponseEntity<Patient> restResponse =
+                new RestTemplate().postForEntity(resultsEndpoint, patient, Patient.class);
         HttpStatus status = restResponse.getStatusCode();
 
         if (status.is2xxSuccessful()) {
             model.addAttribute("resourceLocation", restResponse.getHeaders().getLocation());
+            model.addAttribute("patient", restResponse.getBody());
             if (status == HttpStatus.CREATED) {
                 model.addAttribute("resourceCreated", true);
                 model.addAttribute("location", restResponse.getHeaders().getLocation());
             } else if (status == HttpStatus.OK) {
                 model.addAttribute("resourceCreated", false);
             }
-            response.sendRedirect("/results/index");
+            return "/results/accepted";
         }
 
         // some unknown error occurred (Not invalid Patient nor ServiceNotFound)
