@@ -43,13 +43,15 @@ public class ContactsService {
         this.dupeCheck = new HashMap<String, Contact>();
     }
 
+    @PutMapping("/contacts/getContactList")
+    public ResponseEntity<String> receiveContactList(@RequestBody ContactList contacts) throws NoSuchServiceException {
+        contactDetailsReceived(contacts);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     public void contactDetailsReceived(ContactList contactArray) throws NoSuchServiceException {
         //TODO: Link with Husni's service
-        /*
-        RestTemplate restTemplate = new RestTemplate();
-        ContactList contactList = restTemplate.getForObject("http://localhost:8084/contactsdiscovery/", ContactList.class);
-        System.out.println(contactList);
-        */
+
         for (Contact c : contactArray.getContacts()) {
             ArrayList<String> tempList = c.getCasesList();
             String caseID = tempList.get(0).toString();

@@ -5,7 +5,7 @@ public interface Names {
     String RESULTS_DISCOVERY = "results-discovery";
     String PATIENT_INFO = "patient-info";
     String CONTACT_TRACING = "contact-tracing-followup";
-    String CONTACT_SERVICE = "contact-service";
+    String CONTACT_SERVICE = "contacts";
     String CONTACT_DISCOVERY = "contact-discovery";
 
     // todo fill in the rest of the service names here
