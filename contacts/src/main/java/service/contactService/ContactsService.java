@@ -1,5 +1,7 @@
 package service.contactService;
 
+import service.dns.EurekaDNS;
+import service.exception.NoSuchServiceException;
 import service.messages.ContactList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
@@ -19,6 +21,7 @@ import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.*;
+import static service.core.Names.*;
 
 import java.util.*;
 
@@ -29,16 +32,18 @@ public class ContactsService {
     @Autowired
     private ContactRepository contactRepo;
 
-    ArrayList<Contact> toBeContacted = new ArrayList<Contact>();
-    HashMap<String, Contact> dupeCheck = new HashMap<String, Contact>();
+    private final ArrayList<Contact> toBeContacted;
+    private final HashMap<String, Contact> dupeCheck;
+    private final EurekaDNS dns;
 
     @Autowired
-    public ContactsService(){
-
+    public ContactsService(EurekaDNS dns){
+        this.dns = dns;
+        this.toBeContacted = new ArrayList<Contact>();
+        this.dupeCheck = new HashMap<String, Contact>();
     }
 
-
-    public void contactDetailsReceived(ContactList contactArray){
+    public void contactDetailsReceived(ContactList contactArray) throws NoSuchServiceException {
         //TODO: Link with Husni's service
         /*
         RestTemplate restTemplate = new RestTemplate();
@@ -48,15 +53,16 @@ public class ContactsService {
         for (Contact c : contactArray.getContacts()) {
             ArrayList<String> tempList = c.getCasesList();
             String caseID = tempList.get(0).toString();
-            System.out.println(c);
             if (checkContactExists(c.getPhoneNumber())) {
-                Contact tempContact = contactRepo.findByPhoneNumber(c.getPhoneNumber());
+                Contact tempContact = new Contact(contactRepo.findByPhoneNumber(c.getPhoneNumber()));
+                System.out.println("Temp contact is :" + tempContact);
+                System.out.println("Contact from DB is :" + contactRepo.findByPhoneNumber(c.getPhoneNumber()));
                 ArrayList<String> caseList = tempContact.getCasesList();
                 caseList.add(caseID);
                 tempContact.setCasesList(caseList);
                 contactRepo.save(tempContact);
             }
-            if (checkPatientExists(c.getPhoneNumber())) {
+            else if (checkPatientExists(c.getPhoneNumber())) {
                 c.setContactedStatus(true);
                 contactRepo.insert(c);
                 System.out.println("contact made, patient existed");
@@ -71,9 +77,10 @@ public class ContactsService {
 
     //Checks patient DB to see if phone number exists in there
     @RequestMapping(value="/contacts/checkPatient/{phoneNumber}", method=RequestMethod.GET)
-    public boolean checkPatientExists(@PathVariable String phoneNumber){
+    public boolean checkPatientExists(@PathVariable String phoneNumber) throws NoSuchServiceException {
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity response = restTemplate.getForEntity("http://localhost:8082/patientinfo/" + phoneNumber, Patient.class);
+        URI uri = dns.find(PATIENT_INFO).orElseThrow(dns.getServiceNotFoundSupplier(PATIENT_INFO));
+        ResponseEntity response = restTemplate.getForEntity(uri + "/patientinfo/" + phoneNumber, Patient.class);
         String status = response.getStatusCode().toString();
         if(status.equals("200 OK")){
             return true;
@@ -96,10 +103,12 @@ public class ContactsService {
         }
     }
 
-    //TODO: trigger this periodically
+    //triggered each time donal makes a call, too often?
+    //could always run but have it sleep for an hour at a time
     //TODO: REST Triggers
     @RequestMapping(value = "/contacts/contactRetry", method = RequestMethod.PUT)
     public void contactRetry(){
+        System.out.println("in to retry");
         List<Contact> dbList = contactRepo.findAll();
         long currentTime = Instant.now().getEpochSecond();
         // day in seconds 86400
@@ -108,12 +117,14 @@ public class ContactsService {
                 if ( (c.getContactAttempts() < 3) && ((currentTime < c.getContactedDate()+86400))) {
                     toBeContacted.add(c);
                     dupeCheck.put(c.getPhoneNumber(), c);
+                    System.out.println("retry triggered");
                 }
             }
         }
 
     }
 
+    /*
     // FIXME: Contact does not instantiate correctly, janky work around implemented but could be better
     @RequestMapping(value="/contacts", method=RequestMethod.POST)
     public ResponseEntity<Contact> createContact(@RequestBody Contact contact){
@@ -140,7 +151,7 @@ public class ContactsService {
         System.out.println(contact);
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
 
-    }
+    }*/
 
 
     @RequestMapping(value = "/contact/updateCaseList", method = RequestMethod.PUT)
@@ -151,11 +162,10 @@ public class ContactsService {
         return contact;
     }
 
-
     @RequestMapping(value = "/contacts/getOutputList/{num}", method = RequestMethod.GET)
     public ContactList getContactTracingContacts(@PathVariable int num) {
+        contactRetry();
         int numToSend = toBeContacted.size() < num ? toBeContacted.size() : num;
-
         List<Contact> subList = toBeContacted.subList(0, numToSend);
         ContactList contacts = new ContactList(new ArrayList<Contact>(subList));
         subList.clear();
@@ -177,7 +187,7 @@ public class ContactsService {
     }
 
     @RequestMapping(value = "/contacts/test", method = RequestMethod.GET)
-    public void test(){
+    public void test() throws NoSuchServiceException {
         Contact c1 = new Contact("Finn", "O'Neill", "0000", "abd", "123456");
         Contact c2 = new Contact("Jim", "Ahern", "1111", "xyz", "123456");
         ContactList testList = new ContactList();

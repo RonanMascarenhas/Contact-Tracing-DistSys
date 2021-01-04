@@ -44,6 +44,19 @@ public class Contact implements Serializable{
         this.contactAttempts = 0;
     }
 
+    public Contact(Contact contact){
+        this.uuid = contact.getUuid();
+        this.firstName = contact.getFirstName();
+        this.surname = contact.getSurname();
+        this.phoneNumber = contact.getPhoneNumber();
+        this.address = contact.getAddress();
+        this.contactedStatus = contact.isContactedStatus();
+        this.casesList = contact.getCasesList();
+        this.contactedDate = contact.getContactedDate();
+        this.dateOfCase = contact.getDateOfCase();
+        this.contactAttempts = contact.getContactAttempts();
+    }
+
     public String getUuid() {
         return uuid;
     }
