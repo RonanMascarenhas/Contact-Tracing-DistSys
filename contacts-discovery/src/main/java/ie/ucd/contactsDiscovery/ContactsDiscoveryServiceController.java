@@ -97,8 +97,8 @@ public class ContactsDiscoveryServiceController {
 
         HttpEntity<ContactList> entity = new HttpEntity<>(closeContacts);
 
-        ResponseEntity<String> response = restTemplate.exchange(contactsDiscoveryURL, HttpMethod.PUT, entity,
-                String.class);
+        ResponseEntity<HttpStatus> response = restTemplate.exchange(contactsDiscoveryURL, HttpMethod.PUT, entity,
+                HttpStatus.class);
         logger.info(String.format("%d contact(s) sent with returned HTTP status code %s", closeContacts.size(),
                 response.getStatusCode()));
         if (response.getStatusCode().is2xxSuccessful()) {
