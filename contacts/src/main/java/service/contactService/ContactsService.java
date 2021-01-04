@@ -1,5 +1,7 @@
 package service.contactService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import service.dns.EurekaDNS;
 import service.exception.NoSuchServiceException;
 import service.messages.ContactList;
@@ -26,6 +28,7 @@ import static service.core.Names.*;
 import java.util.*;
 
 @RestController
+@RequestMapping(value = "/contacts")
 public class ContactsService {
 
 
@@ -35,6 +38,8 @@ public class ContactsService {
     private final ArrayList<Contact> toBeContacted;
     private final HashMap<String, Contact> dupeCheck;
     private final EurekaDNS dns;
+    private final Logger logger = LoggerFactory.getLogger(ContactsService.class.getSimpleName());
+
 
     @Autowired
     public ContactsService(EurekaDNS dns){
@@ -50,53 +55,54 @@ public class ContactsService {
     }
 
     public void contactDetailsReceived(ContactList contactArray) throws NoSuchServiceException {
-        //TODO: Link with Husni's service
-
         for (Contact c : contactArray.getContacts()) {
             ArrayList<String> tempList = c.getCasesList();
             String caseID = tempList.get(0).toString();
             if (checkContactExists(c.getPhoneNumber())) {
                 Contact tempContact = new Contact(contactRepo.findByPhoneNumber(c.getPhoneNumber()));
-                System.out.println("Temp contact is :" + tempContact);
-                System.out.println("Contact from DB is :" + contactRepo.findByPhoneNumber(c.getPhoneNumber()));
                 ArrayList<String> caseList = tempContact.getCasesList();
                 caseList.add(caseID);
                 tempContact.setCasesList(caseList);
                 contactRepo.save(tempContact);
+                logger.info(String.format("Contact with Id = %s was updated in the database", tempContact.getUuid()));
             }
             else if (checkPatientExists(c.getPhoneNumber())) {
                 c.setContactedStatus(true);
                 contactRepo.insert(c);
-                System.out.println("contact made, patient existed");
+                logger.info(String.format("Contact with Id = %s was an existing patient, added to contact DB", c.getUuid()));
             } else {
                 contactRepo.insert(c);
                 toBeContacted.add(c);
                 dupeCheck.put(c.getPhoneNumber(), c);
-                System.out.println(c);
+                logger.info(String.format("Contact with Id = %s was added to contact DB", c.getUuid()));
             }
         }
     }
 
     //Checks patient DB to see if phone number exists in there
-    @RequestMapping(value="/contacts/checkPatient/{phoneNumber}", method=RequestMethod.GET)
+    @RequestMapping(value="/Patient/{phoneNumber}", method=RequestMethod.GET)
     public boolean checkPatientExists(@PathVariable String phoneNumber) throws NoSuchServiceException {
         RestTemplate restTemplate = new RestTemplate();
         URI uri = dns.find(PATIENT_INFO).orElseThrow(dns.getServiceNotFoundSupplier(PATIENT_INFO));
         ResponseEntity response = restTemplate.getForEntity(uri + "/patientinfo/" + phoneNumber, Patient.class);
         String status = response.getStatusCode().toString();
+        System.out.println(status);
         if(status.equals("200 OK")){
             return true;
         }
+        else if(status.equals("204 NO CONTENT")){
+            return false;
+        }
         else{
+            logger.error(String.format("PatientInfo returned unrecognised status. Status returned: %s", status));
             return false;
         }
     }
 
     //Checks contacts DB to see if phone number exists there
-    @RequestMapping(value = "contacts/checkContact/{phoneNumber}", method = RequestMethod.GET)
+    @RequestMapping(value = "/Contact/{phoneNumber}", method = RequestMethod.GET)
     public boolean checkContactExists(@PathVariable String phoneNumber){
         Contact temp = contactRepo.findByPhoneNumber(phoneNumber);
-        System.out.println(temp);
         if(temp == null){
             return false;
         }
@@ -105,80 +111,41 @@ public class ContactsService {
         }
     }
 
-    //triggered each time donal makes a call, too often?
-    //could always run but have it sleep for an hour at a time
-    //TODO: REST Triggers
-    @RequestMapping(value = "/contacts/contactRetry", method = RequestMethod.PUT)
+    @RequestMapping(value = "/contactRetry", method = RequestMethod.PUT)
     public void contactRetry(){
-        System.out.println("in to retry");
+        logger.info(String.format("Contact Retry triggered."));
         List<Contact> dbList = contactRepo.findAll();
         long currentTime = Instant.now().getEpochSecond();
+        int i = 0;
         // day in seconds 86400
         for (Contact c : dbList){
             if( !c.isContactedStatus() && !dupeCheck.containsKey(c.getPhoneNumber())) {
                 if ( (c.getContactAttempts() < 3) && ((currentTime < c.getContactedDate()+86400))) {
+                    i++;
                     toBeContacted.add(c);
                     dupeCheck.put(c.getPhoneNumber(), c);
-                    System.out.println("retry triggered");
                 }
             }
         }
-
+        logger.info(String.format("%d contacts added to toBeContacted list."));
     }
 
-    /*
-    // FIXME: Contact does not instantiate correctly, janky work around implemented but could be better
-    @RequestMapping(value="/contacts", method=RequestMethod.POST)
-    public ResponseEntity<Contact> createContact(@RequestBody Contact contact){
-        System.out.println("\nCONTROLLER-ADD: CONTACT RECEIVED: " + contact.getFirstName() + contact.getSurname());
-
-        String path = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()+ "/contacts/"
-                +contact.getPhoneNumber();
-        HttpHeaders headers = new HttpHeaders();
-        try	{
-            headers.setLocation(new URI(path));
-        }
-        catch(URISyntaxException e){
-            System.out.println("\nCONTROLLER-ADD ERROR: " + e);
-        }
-
-        contact.setUuid(UUID.randomUUID().toString());
-
-        long currentTime = Instant.now().getEpochSecond();
-
-        contact.setContactedDate(currentTime);
-        contact.setDateOfCase(currentTime);
-
-        contactRepo.save(contact);
-        System.out.println(contact);
-        return new ResponseEntity<>(headers, HttpStatus.CREATED);
-
-    }*/
-
-
-    @RequestMapping(value = "/contact/updateCaseList", method = RequestMethod.PUT)
-    public Contact updateCaseList(@PathVariable Contact contact, String caseID){
-        ArrayList<String> caseList = contact.getCasesList();
-        caseList.add(caseID);
-        contact.setCasesList(caseList);
-        return contact;
-    }
-
-    @RequestMapping(value = "/contacts/getOutputList/{num}", method = RequestMethod.GET)
+    @RequestMapping(value = "/outputList/{num}", method = RequestMethod.GET)
     public ContactList getContactTracingContacts(@PathVariable int num) {
         contactRetry();
         int numToSend = toBeContacted.size() < num ? toBeContacted.size() : num;
         List<Contact> subList = toBeContacted.subList(0, numToSend);
         ContactList contacts = new ContactList(new ArrayList<Contact>(subList));
         subList.clear();
-
+        logger.info(String.format("%d contacts outputted to be contacted.", numToSend));
         return contacts;
     }
 
     // Contacts may have been not contacted, could be named better.
-    @PutMapping("/contacts/returnedContacts")
+    @PutMapping("/returnedContacts")
     public ResponseEntity<String> receiveContactedContacts(@RequestBody ContactList contacts) {
         processContacts(contacts);
+        logger.info(String.format("List of contacts returned"));
         return new ResponseEntity<String>(HttpStatus.OK);
     }
 
@@ -186,17 +153,16 @@ public class ContactsService {
         for(Contact c : contacts.getContacts()){
             contactRepo.save(c);
         }
+        logger.info(String.format("Returned contacts updated in database."));
     }
 
-    @RequestMapping(value = "/contacts/test", method = RequestMethod.GET)
+    @RequestMapping(value = "/test", method = RequestMethod.GET)
     public void test() throws NoSuchServiceException {
         Contact c1 = new Contact("Finn", "O'Neill", "0000", "abd", "123456");
         Contact c2 = new Contact("Jim", "Ahern", "1111", "xyz", "123456");
         ContactList testList = new ContactList();
         testList.addContact(c1);
         testList.addContact(c2);
-        System.out.println(checkPatientExists(c1.getPhoneNumber()));
-
         contactDetailsReceived(testList);
     }
 }
