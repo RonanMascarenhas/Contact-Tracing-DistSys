@@ -19,7 +19,6 @@ import service.messages.ContactList;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -35,6 +34,7 @@ public class ContactTracingFollowupServiceController {
     private final Queue<String> pendingContactQueue;
     private final ContactList updatedContacts;
     private final Logger logger = LoggerFactory.getLogger(ContactTracingFollowupServiceController.class.getSimpleName());
+
 
     @Autowired
     public ContactTracingFollowupServiceController(EurekaDNS dns) {
@@ -82,7 +82,9 @@ public class ContactTracingFollowupServiceController {
 
     @PostMapping("/contact/{id}")
     public ResponseEntity<Contact> updateContactFollowUpStatus(@PathVariable("id") String id,
-                                              @RequestBody() boolean isContacted) throws URISyntaxException {
+                                              @RequestBody() boolean isContacted)
+            throws URISyntaxException, NoSuchServiceException {
+
         if (!contactsPendingContact.containsKey(id)) {
             logger.error(String.format("No contact with ID %s is pending contact.", id));
             throw new NoSuchContactException();
@@ -94,11 +96,10 @@ public class ContactTracingFollowupServiceController {
         contact.setContactedDate((double) Instant.now().toEpochMilli()/ 1000L);
 
         updatedContacts.addContact(contact);
-        //TODO: Uncomment
-        //sendUpdatedContacts();
+        sendUpdatedContacts();
 
-        String path = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()
-                + "/contact/" + id;
+        String path = String.format("%s/contact/%s", ServletUriComponentsBuilder.fromCurrentContextPath().
+                build().toUriString(), id);
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(new URI(path));
         logger.info(String.format("Contacted status updated for ID %s", id));
@@ -106,23 +107,13 @@ public class ContactTracingFollowupServiceController {
     }
 
     public void getContacts(int num) throws NoSuchServiceException {
-        ContactList contacts = new ContactList();
-        Contact contact1 = new Contact("101", "John", "Smith", "086111", "101 my lane", false, new ArrayList(), 0, 23423414243L);
-        Contact contact2 = new Contact("102", "Tom", "Smith", "086112", "102 my lane", false, new ArrayList(), 0, 53423414243L);
-        Contact contact3 = new Contact("103", "Bob", "Smith", "086113", "103 my lane", false, new ArrayList(), 0, 73423414243L);
-        contacts.addContact(contact1);
-        contacts.addContact(contact2);
-        contacts.addContact(contact3);
+        RestTemplate restTemplate = new RestTemplate();
 
-//        RestTemplate restTemplate = new RestTemplate();
-//
-//        // TODO: Update CONTACT_SERVICE Constant
-//        URI uri = dns.find(CONTACT_SERVICE).orElseThrow(dns.getServiceNotFoundSupplier(CONTACT_SERVICE));
-//
-//        String contactsServiceURL = uri + "/contacts/getOutputList/{num}";
-//
-//        ContactList contacts = restTemplate.getForObject(contactsServiceURL, ContactList.class, num);
-//
+        URI uri = dns.find(CONTACT_SERVICE).orElseThrow(dns.getServiceNotFoundSupplier(CONTACT_SERVICE));
+
+        String contactsServiceURL = String.format("%s/contacts/getOutputList/{num}", uri);
+
+        ContactList contacts = restTemplate.getForObject(contactsServiceURL, ContactList.class, num);
 
         if (contacts != null) {
             logger.info(String.format("%d contacts retrieved from %s", contacts.size(), CONTACT_SERVICE));
@@ -137,7 +128,7 @@ public class ContactTracingFollowupServiceController {
         RestTemplate restTemplate = new RestTemplate();
 
         URI uri = dns.find(CONTACT_SERVICE).orElseThrow(dns.getServiceNotFoundSupplier(CONTACT_SERVICE));
-        String contactsServiceURL = uri + "/contacts/returnedContacts";
+        String contactsServiceURL = String.format("%s/contacts/returnedContacts", uri);
 
         HttpEntity<ContactList> entity = new HttpEntity<ContactList>(updatedContacts);
         ResponseEntity<HttpStatus> response = restTemplate.exchange(contactsServiceURL, HttpMethod.PUT, entity,

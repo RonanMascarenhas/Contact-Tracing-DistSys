@@ -28,6 +28,7 @@ public class ContactTracingFollowupController {
 
     private EurekaDNS dns;
     private static final Logger logger = LoggerFactory.getLogger(ContactTracingFollowupController.class.getSimpleName());
+    private final String CONTACT_TRACING_PATH = "/contacttracingfollowupservice";
 
     @Autowired
     public ContactTracingFollowupController(EurekaDNS dns) {
@@ -48,7 +49,7 @@ public class ContactTracingFollowupController {
         try {
             URI uri = dns.find(CONTACT_TRACING).orElseThrow(dns.getServiceNotFoundSupplier(CONTACT_TRACING));
 
-            String contactTracingURL = uri + "/contacttracingfollowupservice/contact/";
+            String contactTracingURL = String.format("%s%s/contact/", uri, CONTACT_TRACING_PATH);
 
             RestTemplate restTemplate = new RestTemplate();
 
@@ -63,7 +64,7 @@ public class ContactTracingFollowupController {
         }
 
         logger.info(String.format("Contact with ID %s allocated.", id));
-        return "redirect:/contacttracingfollowup/contact/" + id;
+        return String.format("redirect:%s/contact/%s", CONTACT_TRACING_PATH, id);
     }
 
     @GetMapping("/contact/{id}")
@@ -71,7 +72,7 @@ public class ContactTracingFollowupController {
         try {
             URI uri = dns.find(CONTACT_TRACING).orElseThrow(dns.getServiceNotFoundSupplier(CONTACT_TRACING));
 
-            String contactTracingURL = uri + "/contacttracingfollowupservice/contact/" + id;
+            String contactTracingURL = String.format("%s%s/contact/%s", uri, CONTACT_TRACING_PATH, id);
 
             RestTemplate restTemplate = new RestTemplate();
             Contact contact = restTemplate.getForObject(contactTracingURL, Contact.class);
@@ -101,7 +102,7 @@ public class ContactTracingFollowupController {
         try {
             URI uri = dns.find(Names.CONTACT_TRACING).orElseThrow(dns.getServiceNotFoundSupplier(Names.CONTACT_TRACING));
 
-            String contactTracingURL = uri + "/contacttracingfollowupservice/contact/" + id;
+            String contactTracingURL = String.format("%s%s/contact/%s", uri, CONTACT_TRACING_PATH, id);
 
             HttpEntity<Boolean> request = new HttpEntity<>(isContacted);
 
