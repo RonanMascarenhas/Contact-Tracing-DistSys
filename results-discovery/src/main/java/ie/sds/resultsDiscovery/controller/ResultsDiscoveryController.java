@@ -36,7 +36,7 @@ public class ResultsDiscoveryController {
     }
 
     private RestTemplate getRestTemplate() {
-        return templateBuilder.errorHandler(new RestTemplateServerErrorHandler()).build();
+        return new RestTemplate();
     }
 
     /**
