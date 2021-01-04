@@ -1,0 +1,14 @@
+---
+spring:
+  profiles: default
+  application:
+    name: contact-discovery-service
+---
+spring:
+  profiles: docker
+  application:
+    name: contact-discovery-service
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka1:8761/eureka/,http://eureka2:8761/eureka/
