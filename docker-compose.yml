@@ -44,6 +44,8 @@ services:
       - eureka1
       - eureka2
       - mongoDB
+    ports:
+      - "8085:8085"
   contacts-discovery:
     build: contacts-discovery
     image: "contacts-discovery:latest"
@@ -53,6 +55,8 @@ services:
       - activeMQ
       - results-discovery
       - contact-tracing-scheduler
+    ports:
+      - "8084:8084"
   contact-tracing-scheduler:
     build: contact-tracing-scheduler
     image: "contact-tracing-scheduler:latest"
@@ -70,7 +74,7 @@ services:
       - activeMQ
       - patient-info
     ports:
-      - "8084:8084"
+    - "8081:8081"
   contact-tracing-followup:
     build: contact-tracing-followup
     image: "contact-tracing-followup:latest"
