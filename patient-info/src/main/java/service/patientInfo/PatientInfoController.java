@@ -119,7 +119,7 @@ public class PatientInfoController {
 
         if (pTemp==null)    {
             System.out.println("\nCONTROLLER-GETPATIENT: no matching patient found for input phone number");
-            return new ResponseEntity<>(headers, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(headers, HttpStatus.NO_CONTENT);
 //            throw new NoSuchPatientException();
 //            return null;
         }
