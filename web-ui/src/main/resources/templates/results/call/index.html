@@ -7,11 +7,6 @@
 <body>
 <div th:replace="fragments/navbar.html :: navbar"></div>
 <!--/* BEGIN CONTENT */-->
-
-<!--Fetch a call, provide instructions for what to do, submit the work item complete form-->
-<!-- Form can specify complete or incomplete -->
-
-<!--Place workItem in a grid here-->
 <div class="container my-5">
   <div class="row">
     <h3>Results Call Console</h3>
@@ -36,13 +31,10 @@
         <td id="p-phone" th:text="*{phoneNumber}">PHONE_NUMBER</td>
         <td id="p-result" th:text="*{result}">RESULT</td>
         <td id="p-lastAccessed" th:text="*{lastAccessed}">LAST_ACCESSED</td>
-        <!--        todo format the time above -->
       </tr>
       </tbody>
     </table>
-    <!--Form with buttons here-->
     <div id="workitem-controls">
-      <!--      A form to edit the workItem on the page -->
       <form action="#" method="post" th:action="@{/results/call}" th:object="${workItem}">
         <fieldset class="form-group">
           <legend>Results Call Status</legend>
@@ -53,6 +45,10 @@
             </li>
           </ul>
           <input th:field="*{patientId}" th:value="*{patientId}" type="hidden">
+          <input th:field="*{firstName}" th:value="*{firstName}" type="hidden">
+          <input th:field="*{surname}" th:value="*{surname}" type="hidden">
+          <input th:field="*{phoneNumber}" th:value="*{phoneNumber}" type="hidden">
+          <input th:field="*{result}" th:value="*{result}" type="hidden">
           <input th:field="*{created}" th:value="*{created}" type="hidden">
           <input th:field="*{lastAccessed}" th:value="*{lastAccessed}" type="hidden">
         </fieldset>

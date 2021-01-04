@@ -101,7 +101,7 @@ public class ResultsDiscoveryController {
     public ResponseEntity<PatientResultCallWorkItem> getCallPatientWorkItem() {
         if (callQueue.isEmpty()) {
             logger.info(String.format("No items in %s", Names.PATIENT_RESULTS_CALL_WI_QUEUE));
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.noContent().build();
         }
         PatientResultCallWorkItem workItem = callQueue.remove();
         logger.info("Finished in 'GET /result/workitem'");

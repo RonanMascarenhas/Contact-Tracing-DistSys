@@ -91,7 +91,7 @@ public class ContactTracingFollowupServiceController {
         Contact contact = contactsPendingContact.remove(id);
         contact.setContactedStatus(isContacted);
         // Changing time unit to seconds.
-        contact.setContactedDate((double) Instant.now().toEpochMilli()/ 1000L);
+        contact.setContactedDate((long) Instant.now().toEpochMilli()/ 1000L);
 
         updatedContacts.addContact(contact);
         //TODO: Uncomment
@@ -107,9 +107,9 @@ public class ContactTracingFollowupServiceController {
 
     public void getContacts(int num) throws NoSuchServiceException {
         ContactList contacts = new ContactList();
-        Contact contact1 = new Contact("101", "John", "Smith", "086111", "101 my lane", false, new ArrayList(), 0, 23423414243L);
-        Contact contact2 = new Contact("102", "Tom", "Smith", "086112", "102 my lane", false, new ArrayList(), 0, 53423414243L);
-        Contact contact3 = new Contact("103", "Bob", "Smith", "086113", "103 my lane", false, new ArrayList(), 0, 73423414243L);
+        Contact contact1 = new Contact("John", "Smith", "086111", "101 my lane", "123");
+        Contact contact2 = new Contact("Tom", "Smith", "086112", "102 my lane", "123");
+        Contact contact3 = new Contact("Bob", "Smith", "086113", "103 my lane", "123");
         contacts.addContact(contact1);
         contacts.addContact(contact2);
         contacts.addContact(contact3);
@@ -127,10 +127,12 @@ public class ContactTracingFollowupServiceController {
         if (contacts != null) {
             logger.info(String.format("%d contacts retrieved from %s", contacts.size(), CONTACT_SERVICE));
             for (Contact contact : contacts.getContacts()) {
-                contactsPendingContact.put(contact.getId(), contact);
-                pendingContactQueue.add(contact.getId());
+                contactsPendingContact.put(contact.getUuid(), contact);
+                pendingContactQueue.add(contact.getUuid());
             }
         }
+
+
     }
 
     public void sendUpdatedContacts() throws NoSuchServiceException {
