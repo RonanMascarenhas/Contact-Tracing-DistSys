@@ -93,7 +93,7 @@ public class ContactTracingFollowupServiceController {
         Contact contact = contactsPendingContact.remove(id);
         contact.setContactedStatus(isContacted);
         // Changing time unit to seconds.
-        contact.setContactedDate((double) Instant.now().toEpochMilli()/ 1000L);
+        contact.setContactedDate(Instant.now().toEpochMilli()/ 1000L);
 
         updatedContacts.addContact(contact);
         sendUpdatedContacts();
@@ -118,8 +118,8 @@ public class ContactTracingFollowupServiceController {
         if (contacts != null) {
             logger.info(String.format("%d contacts retrieved from %s", contacts.size(), CONTACT_SERVICE));
             for (Contact contact : contacts.getContacts()) {
-                contactsPendingContact.put(contact.getId(), contact);
-                pendingContactQueue.add(contact.getId());
+                contactsPendingContact.put(contact.getUuid(), contact);
+                pendingContactQueue.add(contact.getUuid());
             }
         }
     }
