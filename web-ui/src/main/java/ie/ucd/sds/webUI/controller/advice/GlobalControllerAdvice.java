@@ -1,20 +1,24 @@
 package ie.ucd.sds.webUI.controller.advice;
 
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import service.exception.InvalidEntityException;
 import service.exception.NoSuchServiceException;
 
 @ControllerAdvice
-public class ResultsDiscoveryControllerAdvice {
-    // todo response statuses here?
+public class GlobalControllerAdvice {
     // todo implement correct handling
 
     @ExceptionHandler(NoSuchServiceException.class)
-    public void handleMissingService() {
+    public String handleMissingService(NoSuchServiceException ex, Model model) {
+        model.addAttribute("msg", ex.getMessage());
+        return "/problem";
     }
 
     @ExceptionHandler(InvalidEntityException.class)
-    public void handleMalformedEntity() {
+    public String handleMalformedEntity(InvalidEntityException ex, Model model) {
+        model.addAttribute("msg", ex.getMessage());
+        return "/problem";
     }
 }
