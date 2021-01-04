@@ -50,7 +50,6 @@ public class ContactsService {
 
     @PutMapping("/getContactList")
     public ResponseEntity<String> receiveContactList(@RequestBody ContactList contacts) throws NoSuchServiceException {
-        System.out.println("I WAS HERE");
         contactDetailsReceived(contacts);
         return new ResponseEntity<>(HttpStatus.OK);
     }
