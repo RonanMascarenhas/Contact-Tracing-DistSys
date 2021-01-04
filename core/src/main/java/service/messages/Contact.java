@@ -1,40 +1,68 @@
 package service.messages;
 
-import java.io.Serializable;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.Instant;
 import java.util.ArrayList;
+import java.io.Serializable;
+import java.util.UUID;
 
-public class Contact implements Serializable {
+@Document(collection = "contacts")
+public class Contact implements Serializable{
 
-    private String id; //numerical id
+    @Id
+    private String uuid; // unique id
     private String firstName;
-    private String lastName;
+    private String surname;
     private String phoneNumber;
     private String address;
     private boolean contactedStatus; //Has the person been successfully contacted, True=Yes, False=No
     private ArrayList casesList; //List of patient ids that the person has been in contact with
-    private double contactedDate; //date the person was last contacted on
-    private double dateOfCase; //date that the person was in contact with the patient
+    private long contactedDate; ////if contacted true then this is the date of contact, if false it is the date of the last attempt at contact
+    private long dateOfCase; //date that the person was in contact with the patient (epoch time)
+    private int contactAttempts; //The number of times they have attempted to be contacted
 
     public Contact() {}
 
-    public Contact(String id, String firstName, String lastName, String phoneNumber, String address, boolean contactedStatus, ArrayList casesList, double contactedDate, double dateOfCase) {
-        this.id = id;
+    public Contact(String firstName, String surname, String phoneNumber, String address, String caseID) {
+        this.uuid = UUID.randomUUID().toString();
         this.firstName = firstName;
-        this.lastName = lastName;
+        this.surname = surname;
         this.phoneNumber = phoneNumber;
         this.address = address;
-        this.contactedStatus = contactedStatus;
-        this.casesList = casesList;
-        this.contactedDate = contactedDate;
-        this.dateOfCase = dateOfCase;
+        this.contactedStatus = false;
+
+        ArrayList<String> caseList = new ArrayList<String>();
+        caseList.add(caseID);
+        this.casesList = caseList;
+
+        long currentTime = Instant.now().getEpochSecond();
+
+        this.contactedDate = currentTime;
+        this.dateOfCase = currentTime;
+        this.contactAttempts = 0;
     }
 
-    public String getId() {
-        return id;
+    public Contact(Contact contact){
+        this.uuid = contact.getUuid();
+        this.firstName = contact.getFirstName();
+        this.surname = contact.getSurname();
+        this.phoneNumber = contact.getPhoneNumber();
+        this.address = contact.getAddress();
+        this.contactedStatus = contact.isContactedStatus();
+        this.casesList = contact.getCasesList();
+        this.contactedDate = contact.getContactedDate();
+        this.dateOfCase = contact.getDateOfCase();
+        this.contactAttempts = contact.getContactAttempts();
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getFirstName() {
@@ -45,12 +73,12 @@ public class Contact implements Serializable {
         this.firstName = firstName;
     }
 
-    public String getLastName() {
-        return lastName;
+    public String getSurname() {
+        return surname;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 
     public String getPhoneNumber() {
@@ -85,34 +113,39 @@ public class Contact implements Serializable {
         this.casesList = casesList;
     }
 
-    public double getContactedDate() {
+    public long getContactedDate() {
         return contactedDate;
     }
 
-    public void setContactedDate(double contactedDate) {
+    public void setContactedDate(long contactedDate) {
         this.contactedDate = contactedDate;
     }
 
-    public double getDateOfCase() {
+    public long getDateOfCase() {
         return dateOfCase;
     }
 
-    public void setDateOfCase(double dateOfCase) {
+    public void setDateOfCase(long dateOfCase) {
         this.dateOfCase = dateOfCase;
     }
+
+    public int getContactAttempts() {return contactAttempts;}
+
+    public void setContactAttempts(int contactAttempts) {this.contactAttempts = contactAttempts;}
 
     @Override
     public String toString() {
         return "Contact{" +
-                "id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", address='" + address + '\'' +
-                ", contactedStatus=" + contactedStatus +
-                ", casesList=" + casesList +
-                ", contactedDate=" + contactedDate +
-                ", dateOfCase=" + dateOfCase +
+                "uuid = " + uuid +
+                ", first name = " + firstName +
+                ", surname = " + surname +
+                ", phone = " + phoneNumber +
+                ", address = " + address +
+                ", contactedStatus = " + contactedStatus +
+                ", casesList = " + casesList +
+                ", contactedDate = " + contactedDate +
+                ", dateOfCase = " + dateOfCase +
+                ", contactAttempts = " + contactAttempts +
                 '}';
     }
 }
