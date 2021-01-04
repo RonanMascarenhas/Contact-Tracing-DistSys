@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<div th:replace="fragments/head.html :: head ('SDS | Contact Tracing Service')"></div>
+
+<body>
+<div th:replace="fragments/navbar.html :: navbar"></div>
+
+<div class="container">
+    <div class="bs-docs-selection">
+        <div class="row">
+            <div class="page-header">
+                <h1 id="contact_discovery">Contact Tracing</h1>
+            </div>
+            <div class="bs-component">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>First Name</th>
+                            <th>Surname</th>
+                            <th>Phone Number</th>
+                            <th>Address</th>
+                            <th>Date of Case</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td th:text="${contact.firstName}"></td>
+                            <td th:text="${contact.surname}"></td>
+                            <td th:text="${contact.phoneNumber}"></td>
+                            <td th:text="${contact.address}"></td>
+                            <td th:text="${contact.dateOfCase}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+<div th:replace="fragments/includeScripts.html"></div>
+</div>
+</body>

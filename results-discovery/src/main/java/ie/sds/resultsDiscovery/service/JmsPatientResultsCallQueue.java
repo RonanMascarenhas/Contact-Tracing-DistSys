@@ -12,8 +12,6 @@ import javax.jms.ConnectionFactory;
 
 @Service
 public class JmsPatientResultsCallQueue implements PatientResultsCallQueue {
-    private static final int HIGH_PRIORITY = 9;
-    private static final int REGULAR_PRIORITY = 4;
     private static final long FIVE_SECOND_TIMEOUT = 5 * 1000;
 
     private final JmsTemplate template;
@@ -36,13 +34,6 @@ public class JmsPatientResultsCallQueue implements PatientResultsCallQueue {
         add(workItem);
     }
 
-    @Override
-    public void addWithPriority(PatientResultCallWorkItem workItem) {
-        setHighPriority();
-        add(workItem);
-        setRegularPriority();
-    }
-
     /**
      * This is a blocking operation. Care should be taken to ensure that there is an item in the queue before calling
      * this method. This method will not wait for a message to appear in an empty queue.
@@ -59,18 +50,5 @@ public class JmsPatientResultsCallQueue implements PatientResultsCallQueue {
     public boolean isEmpty() {
         Boolean empty = template.browse((session, queueBrowser) -> !queueBrowser.getEnumeration().hasMoreElements());
         return (empty == null) ? false : empty;
-    }
-
-    // todo remove notion of priority; Not working
-    private void setRegularPriority() {
-        if (template.getPriority() != REGULAR_PRIORITY) {
-            template.setPriority(REGULAR_PRIORITY);
-        }
-    }
-
-    private void setHighPriority() {
-        if (template.getPriority() != HIGH_PRIORITY) {
-            template.setPriority(HIGH_PRIORITY);
-        }
     }
 }

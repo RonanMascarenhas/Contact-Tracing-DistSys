@@ -48,6 +48,12 @@ public class ContactsService {
         this.dupeCheck = new HashMap<String, Contact>();
     }
 
+    @PutMapping("/contacts/getContactList")
+    public ResponseEntity<String> receiveContactList(@RequestBody ContactList contacts) throws NoSuchServiceException {
+        contactDetailsReceived(contacts);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     public void contactDetailsReceived(ContactList contactArray) throws NoSuchServiceException {
         for (Contact c : contactArray.getContacts()) {
             ArrayList<String> tempList = c.getCasesList();
