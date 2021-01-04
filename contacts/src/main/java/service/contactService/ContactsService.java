@@ -2,30 +2,24 @@ package service.contactService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import service.dns.EurekaDNS;
-import service.exception.NoSuchServiceException;
-import service.messages.ContactList;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import service.core.Patient;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import service.dns.EurekaDNS;
+import service.exception.NoSuchServiceException;
 import service.messages.Contact;
-import javax.annotation.PostConstruct;
-import java.lang.reflect.Array;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.time.*;
-import static service.core.Names.*;
+import service.messages.ContactList;
 
-import java.util.*;
+import java.net.URI;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import static service.core.Names.PATIENT_INFO;
 
 @RestController
 @RequestMapping(value = "/contacts")
@@ -127,7 +121,7 @@ public class ContactsService {
                 }
             }
         }
-        logger.info(String.format("%d contacts added to toBeContacted list."));
+        logger.info(String.format("%d contacts added to toBeContacted list.", i));
     }
 
     @RequestMapping(value = "/outputList/{num}", method = RequestMethod.GET)
