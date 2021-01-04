@@ -131,8 +131,8 @@ public class ContactTracingFollowupServiceController {
         String contactsServiceURL = String.format("%s/contacts/returnedContacts", uri);
 
         HttpEntity<ContactList> entity = new HttpEntity<ContactList>(updatedContacts);
-        ResponseEntity<HttpStatus> response = restTemplate.exchange(contactsServiceURL, HttpMethod.PUT, entity,
-                HttpStatus.class);
+        ResponseEntity<String> response = restTemplate.exchange(contactsServiceURL, HttpMethod.PUT, entity,
+                String.class);
         logger.info(String.format("%d contacts sent with returned HTTP status code %s", updatedContacts.size(),
                 response.getStatusCode()));
         if (response.getStatusCode().is2xxSuccessful()) {

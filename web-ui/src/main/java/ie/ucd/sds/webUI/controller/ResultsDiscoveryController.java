@@ -141,7 +141,7 @@ public class ResultsDiscoveryController {
             } else if (status == HttpStatus.OK) {
                 model.addAttribute("resourceCreated", false);
             }
-            return "/results/accepted";
+            return "results/accepted";
         }
 
         // some unknown error occurred (Not invalid Patient nor ServiceNotFound)
