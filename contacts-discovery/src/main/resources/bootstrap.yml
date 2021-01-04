@@ -3,4 +3,4 @@ spring:
     name: contact-discovery-service
 
 server:
-  port: 8085
+  port: 8084

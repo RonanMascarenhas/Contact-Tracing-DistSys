@@ -3,18 +3,16 @@ package service.core;
 public class Subject {
     private String firstName;
     private String surname;
-    private int age;
-    private char sex;
     private String phoneNumber;
     private String address;
+    private String caseId;
 
-    public Subject(String firstName, String surname, int age, char sex, String phoneNumber, String address) {
+    public Subject(String firstName, String surname, String phoneNumber, String address, String caseId) {
         this.firstName = firstName;
         this.surname = surname;
-        this.age = age;
-        this.sex = sex;
         this.phoneNumber = phoneNumber;
         this.address = address;
+        this.caseId = caseId;
     }
 
     public Subject() {}
@@ -35,22 +33,6 @@ public class Subject {
         this.surname = surname;
     }
 
-    public int getAge() {
-        return age;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
-    }
-
-    public char getSex() {
-        return sex;
-    }
-
-    public void setSex(char sex) {
-        this.sex = sex;
-    }
-
     public String getPhoneNumber() {
         return phoneNumber;
     }
@@ -65,5 +47,13 @@ public class Subject {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getCaseId() {
+        return caseId;
+    }
+
+    public void setCaseId(String caseId) {
+        this.caseId = caseId;
     }
 }

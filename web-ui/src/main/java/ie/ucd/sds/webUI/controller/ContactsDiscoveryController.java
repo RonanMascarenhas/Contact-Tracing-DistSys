@@ -52,23 +52,24 @@ public class ContactsDiscoveryController {
     @GetMapping("contactsdiscovery/patient/{patientId}")
     public String getContactsInfo(@PathVariable("patientId") String patientId, Model model) {
         try {
-        URI uri = dns.find(Names.CONTACT_DISCOVERY).orElseThrow(dns.getServiceNotFoundSupplier(Names.CONTACT_DISCOVERY));
+            URI uri = dns.find(Names.CONTACT_DISCOVERY).orElseThrow(dns.getServiceNotFoundSupplier(Names.CONTACT_DISCOVERY));
 
-        String contactsDiscoveryURL = uri + "/contactsdiscovery/patient/" + patientId;
+            String contactsDiscoveryURL = uri + "/contactsdiscovery/patient/" + patientId;
 
-        RestTemplate restTemplate = new RestTemplate();
-        Contact contact = restTemplate.getForObject(contactsDiscoveryURL, Contact.class);
+            RestTemplate restTemplate = new RestTemplate();
+            Contact contact = restTemplate.getForObject(contactsDiscoveryURL, Contact.class);
 
-        if (contact == null) throw new NoSuchContactException();
+            if (contact == null) throw new NoSuchContactException();
 
-        model.addAttribute("contact", contact);
-    } catch (Exception e) {
-        logger.error(String.format("Error receiving contact from patient with ID %s: %s", patientId, e.getMessage()));
+            model.addAttribute("contact", contact);
+        } catch (Exception e) {
+            logger.error(String.format("Error receiving contact from patient with ID %s: %s", patientId, e.getMessage()));
 
-        model.addAttribute("error", e.getClass().getName());
+            model.addAttribute("error", e.getClass().getName());
 
-        return "Contact Tracing Error";
+            return "Contact Tracing Error";
+        }
+
+        return "contact";
     }
-
-    return "contact";
 }
