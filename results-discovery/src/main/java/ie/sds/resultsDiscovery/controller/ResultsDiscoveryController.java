@@ -5,7 +5,6 @@ import ie.sds.resultsDiscovery.service.PatientResultsCallQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,16 +22,12 @@ import java.util.Objects;
 public class ResultsDiscoveryController {
     private final DomainNameService dns;
     private final PatientResultsCallQueue callQueue;
-    private final RestTemplateBuilder templateBuilder;
     private final Logger logger = LoggerFactory.getLogger(ResultsDiscoveryController.class);
 
     @Autowired
-    public ResultsDiscoveryController(
-            DomainNameService dns, PatientResultsCallQueue callQueue, RestTemplateBuilder templateBuilder
-    ) {
+    public ResultsDiscoveryController(DomainNameService dns, PatientResultsCallQueue callQueue) {
         this.dns = dns;
         this.callQueue = callQueue;
-        this.templateBuilder = templateBuilder;
     }
 
     private RestTemplate getRestTemplate() {
