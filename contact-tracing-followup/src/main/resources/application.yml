@@ -1,0 +1,16 @@
+---
+spring:
+  profiles: default
+  application:
+    name: contact-tracing-followup
+server:
+  port: 8083
+---
+spring:
+  profiles: docker
+  application:
+    name: contact-tracing-followup
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka1:8761/eureka/,http://eureka2:8761/eureka/
