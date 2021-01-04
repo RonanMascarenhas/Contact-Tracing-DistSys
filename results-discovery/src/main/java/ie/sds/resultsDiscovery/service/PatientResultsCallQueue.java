@@ -18,11 +18,6 @@ public interface PatientResultsCallQueue {
     void add(Patient patient);
 
     /**
-     * @param workItem
-     */
-    void addWithPriority(PatientResultCallWorkItem workItem);
-
-    /**
      * @return
      */
     PatientResultCallWorkItem remove();

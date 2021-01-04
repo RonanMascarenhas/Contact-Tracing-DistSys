@@ -5,7 +5,6 @@ import ie.sds.resultsDiscovery.service.PatientResultsCallQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,20 +22,16 @@ import java.util.Objects;
 public class ResultsDiscoveryController {
     private final DomainNameService dns;
     private final PatientResultsCallQueue callQueue;
-    private final RestTemplateBuilder templateBuilder;
     private final Logger logger = LoggerFactory.getLogger(ResultsDiscoveryController.class);
 
     @Autowired
-    public ResultsDiscoveryController(
-            DomainNameService dns, PatientResultsCallQueue callQueue, RestTemplateBuilder templateBuilder
-    ) {
+    public ResultsDiscoveryController(DomainNameService dns, PatientResultsCallQueue callQueue) {
         this.dns = dns;
         this.callQueue = callQueue;
-        this.templateBuilder = templateBuilder;
     }
 
     private RestTemplate getRestTemplate() {
-        return templateBuilder.errorHandler(new RestTemplateServerErrorHandler()).build();
+        return new RestTemplate();
     }
 
     /**
@@ -114,7 +109,7 @@ public class ResultsDiscoveryController {
         //  not done? add it back to the queue
         if (workItem.getStatus() != PatientResultCallWorkItem.Status.DONE) {
             logger.info(String.format("Adding PatientResultWorkItem with id=%s back to the queue", workItem.getPatientId()));
-            callQueue.addWithPriority(workItem);
+            callQueue.add(workItem);
         }
 
         logger.info("Finished in 'POST /result/workitem'");
