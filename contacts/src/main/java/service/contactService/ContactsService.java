@@ -48,8 +48,9 @@ public class ContactsService {
         this.dupeCheck = new HashMap<String, Contact>();
     }
 
-    @PutMapping("/contacts/getContactList")
+    @PutMapping("/getContactList")
     public ResponseEntity<String> receiveContactList(@RequestBody ContactList contacts) throws NoSuchServiceException {
+        System.out.println("I WAS HERE");
         contactDetailsReceived(contacts);
         return new ResponseEntity<>(HttpStatus.OK);
     }
