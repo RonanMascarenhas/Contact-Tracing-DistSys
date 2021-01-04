@@ -1,6 +1,6 @@
 spring:
   application:
-    name: contact-tracing-service
+    name: contact-tracing-followup
 
 server:
   port: 8083

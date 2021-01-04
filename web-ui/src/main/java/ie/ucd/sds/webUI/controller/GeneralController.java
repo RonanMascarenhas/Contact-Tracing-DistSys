@@ -9,4 +9,9 @@ public class GeneralController {
     public String index() {
         return "index";
     }
+
+    @GetMapping("/problem")
+    public String problem() {
+        return "problem";
+    }
 }

@@ -42,7 +42,7 @@
             <div class="col-lg-6">
                 <div class="bs-component">
                     <p>Was <span th:text="${contact.firstName}">the contact</span> successfully contacted?</p>
-                    <form action="#" th:action="@{/contacttracing/contact/{id}(id=${contact.id})}" th:object="${contact}" method="post">
+                    <form action="#" th:action="@{/contacttracingfollowup/contact/{id}(id=${contact.id})}" th:object="${contact}" method="post">
                         <fieldset class="form-group">
                             <div class="form-check">
                                 <label class="form-check-label">
