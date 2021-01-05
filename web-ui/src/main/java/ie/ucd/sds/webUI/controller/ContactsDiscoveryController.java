@@ -103,8 +103,8 @@ public class ContactsDiscoveryController {
 
     @GetMapping("/patient/remove/{patientId}")
     public String removePatient(@PathVariable("patientId") String patientId) {
-        patients.remove(patientId);
         logger.info(String.format("The removed patient has map value %s", patients.get(patientId)));
+        patients.remove(patientId);
 
         return "redirect:/contactsdiscovery/patient";
     }
