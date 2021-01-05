@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<!--/* Replace the parameter below with the page title */-->
+<div th:replace="fragments/head.html :: head ('SDS | No Patients')"></div>
+
+<body>
+<div th:replace="fragments/navbar.html :: navbar"></div>
+<!--/* BEGIN CONTENT */-->
+<div class="container my-5">
+    <div class="row">
+        <h3>No Non-Contact Traced Patients Available</h3>
+    </div>
+    <div class="row"><p>Try again in a few minutes</p></div>
+    <div class="row">
+        <a class="btn btn-primary" th:href="@{/contactsdiscovery/patient}">Get New Patient</a>
+    </div>
+</div>
+<!--/* END CONTENT */-->
+<div th:replace="fragments/includeScripts.html"></div>
+</body>
+</html>

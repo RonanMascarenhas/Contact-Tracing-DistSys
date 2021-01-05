@@ -18,6 +18,7 @@ import service.messages.Contact;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.Objects;
 
 @Controller
 @RequestMapping(value = "/contactsdiscovery")
@@ -41,14 +42,14 @@ public class ContactsDiscoveryController {
 
             String contactsDiscoveryURL = uri + "/contactsdiscovery/patient";
 
-            System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-
             RestTemplate restTemplate = new RestTemplate();
 
-            System.out.println("THE URI IS: " + contactsDiscoveryURL);
             Patient patient = restTemplate.getForObject(contactsDiscoveryURL, Patient.class);
 
-            System.out.println("======================================================================" + patient.getId());
+            if (Objects.isNull(patient)) {
+                return "patients/noPatients";
+            }
+
             patients.put(patient.getId(), patient);
 
             return "redirect:/contactsdiscovery/patient/" + patient.getId();
@@ -66,12 +67,12 @@ public class ContactsDiscoveryController {
             Patient patient = patients.get(patientId);
             model.addAttribute("patient", patient);
             model.addAttribute("subject", subject);
-        } else {
-            logger.error(String.format("Error finding patient with ID: %s", patientId));
-
-            // TODO error page
+        } else if (patients.isEmpty()) {
+            return "patients/noPatients";
         }
-
+        else {
+                logger.error(String.format("Error finding patient with ID: %s", patientId));
+            }
         return "contactsdiscovery";
     }
 
@@ -94,49 +95,14 @@ public class ContactsDiscoveryController {
 
         return "contactsdiscovery";
     }
-//    @PostMapping("/patient/{patientId}")
-//    public String sendPatientInfo(@PathVariable("patientId") String patientId,
-//                                  @RequestBody Contact contact, Model model) {
-//        try {
-//            URI uri = dns.find(Names.CONTACT_DISCOVERY).orElseThrow(dns.getServiceNotFoundSupplier(Names.CONTACT_DISCOVERY));
-//
-//            String contactsDiscoveryURL = uri + "/contactsdiscovery/patient" + patientId;
-//
-//            HttpEntity<Contact> request = new HttpEntity<>(contact);
-//
-//            RestTemplate restTemplate = new RestTemplate();
-//            restTemplate.postForEntity(contactsDiscoveryURL, request, Contact.class);
-//        } catch (Exception e) {
-//            logger.error(String.format("Error sending patient %s to WebUI: %s", patientId, e.getMessage()));
-//            model.addAttribute("error", e.getClass().getName());
-//
-//            return "Contact Tracing Error";
-//        }
-//
-//        return "redirect:/contactsdiscovery/";
-//    }
-//
-//    @GetMapping("/patient/{patientId}")
-//    public String getContactsInfo(@PathVariable("patientId") String patientId, Model model) {
-//        try {
-//            URI uri = dns.find(Names.CONTACT_DISCOVERY).orElseThrow(dns.getServiceNotFoundSupplier(Names.CONTACT_DISCOVERY));
-//
-//            String contactsDiscoveryURL = uri + "/contactsdiscovery/patient/" + patientId;
-//
-//            RestTemplate restTemplate = new RestTemplate();
-//            Contact contact = restTemplate.getForObject(contactsDiscoveryURL, Contact.class);
-//
-//            if (contact == null) throw new NoSuchContactException();
-//
-//            model.addAttribute("contact", contact);
-//        } catch (Exception e) {
-//            logger.error(String.format("Error receiving contact from patient with ID %s: %s", patientId, e.getMessage()));
-//
-//            model.addAttribute("error", e.getClass().getName());
-//
-//            return "Contact Tracing Error";
-//        }
-//
-//        return "contact";
-//    }
+
+    @GetMapping("/patient/remove/{patientId}")
+    public String removePatient(@PathVariable("patientId") String patientId) {
+        logger.info(String.format("The patient about to be removed has map value %s and %s", patients.get(patientId), patients.entrySet()));
+        patients.remove(patientId);
+        logger.info(String.format("The removed patient has map value %s and %s", patients.get(patientId), patients.entrySet()));
+        logger.info(String.format("The patientId %s was removed from the map", patientId));
+
+        return "redirect:/contactsdiscovery/patient";
+    }
 }

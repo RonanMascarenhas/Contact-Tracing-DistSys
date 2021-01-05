@@ -85,14 +85,8 @@ public class ContactsDiscoveryServiceController {
     @GetMapping("/patient")
     public Patient sendPatientInfo() throws java.net.URISyntaxException {
         patient = getPatientFromQueue();
-//        String path = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() +
-//                "/patient/" + patient.getId();
-//
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setLocation(new URI(path));
 
         return patient;
-        //return new ResponseEntity<>(patient, headers, HttpStatus.CREATED);
     }
 
     ContactList closeContacts = new ContactList();
