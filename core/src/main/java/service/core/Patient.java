@@ -1,21 +1,16 @@
 package service.core;
 
-//import org.springframework.data.annotation.Id;
 import java.io.Serializable;
 
 
 public class Patient implements Serializable{
 
-//    @Id
     private String id;  //for internal use by mongodb(see https://spring.io/guides/gs/accessing-data-mongodb/#scratch)
     private String firstName;
     private String surname;
     private String phoneNumber;
     private Result result;
     private ContactTraced ct;
-
-//    private PatientInfo info;
-//    private TestResult result;
 
     public Patient(){};
 
@@ -57,26 +52,4 @@ public class Patient implements Serializable{
                 "Patient[id=%s, firstName=%s, surname=%s, phoneNumber=%s]",
                 id, firstName, surname, phoneNumber);
     }
-
-    //    public PatientInfo getPatientInfo()   { return info; }
-//    public void setPatientInfo(PatientInfo info)  { this.info=info; }
-
-//    public TestResult getTestResult()   { return result; }
-//    public void setTestResult(TestResult result)  { this.result=result; }
-
-//    public ContactTraced getContactTraced()   { return ct; }
-//    public void setContactTraced(ContactTraced ct)  { this.ct=ct; }
-
-    /*
-    public Patient(String id, PatientInfo info, String firstName, String surname, TestResult result, ContactTraced ct){
-        this.id = id;
-        this.firstName = firstName;
-        this.surname= surname;
-//        this.info = info;
-//        this.result = result;
-        this.ct = ct;
-    };
-
-     */
-
 }

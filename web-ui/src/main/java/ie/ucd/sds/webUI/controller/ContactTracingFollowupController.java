@@ -113,7 +113,6 @@ public class ContactTracingFollowupController {
         } catch (Exception e) {
             logger.error(String.format("Error encountered sending updated contact with ID %s: %s", id, e.getMessage()));
             model.addAttribute("error", e.getClass().getName());
-            // TODO: Consider redirecting back to contact with same ID to retry sending, error message would be useful.
             return "contacttracingerror";
         }
 

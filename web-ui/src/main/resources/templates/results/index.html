@@ -39,7 +39,7 @@
             </li>
           </ul>
         </fieldset>
-        <div> <!-- former div attributes: class="col-1" style="margin: auto;" -->
+        <div>
           <button class="btn btn-primary" type="submit">Submit</button>
         </div>
         <input name="ct" type="hidden" value="NO">
@@ -65,7 +65,6 @@
 </div>
 
 <div th:replace="fragments/includeScripts.html"></div>
-<!--/* todo add a toast here that shows the patient details and its new location */-->
 <div th:if="${resourceCreated}">
   <script>
       /* Causes the toast to show up and fade away after 'timeout' seconds */

@@ -42,7 +42,6 @@ public class JmsPatientResultsCallQueue implements PatientResultsCallQueue {
      */
     @Override
     public PatientResultCallWorkItem remove() {
-        // todo throw an exception if there is no work item returned
         return (PatientResultCallWorkItem) template.receiveAndConvert();
     }
 

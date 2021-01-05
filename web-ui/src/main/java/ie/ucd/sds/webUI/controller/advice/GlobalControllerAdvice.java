@@ -8,7 +8,6 @@ import service.exception.NoSuchServiceException;
 
 @ControllerAdvice
 public class GlobalControllerAdvice {
-    // todo implement correct handling
 
     @ExceptionHandler(NoSuchServiceException.class)
     public String handleMissingService(NoSuchServiceException ex, Model model) {
