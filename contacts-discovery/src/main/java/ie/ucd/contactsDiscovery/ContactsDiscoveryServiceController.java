@@ -67,18 +67,32 @@ public class ContactsDiscoveryServiceController {
 
     // Gets next patient info from queue
     // TODO: ?? Talk to Joe about this Im not sure how to receive from his JMS Template
-/*    @RequestMapping(value = "/contactsdiscovery", method = RequestMethod.GET)
-    ResponseEntity<ContactTracingWorkItem> getPatientInfo()  {
-        if (callQueue.isEmpty)
-    }*/
+//    @RequestMapping(value = "/contactsdiscovery", method = RequestMethod.GET)
+//    ResponseEntity<ContactTracingWorkItem> getPatientInfo()  {
+//        if (callQueue.isEmpty)
+//    }
 
     Patient patients = new Patient();
 
-    // Sends patient info to Web UI
-    @RequestMapping(value = "/patient/{patientId}", method = RequestMethod.POST)
-    public ResponseEntity<Patient> sendPatientInfo(@PathVariable("patientId") String patientId,
-                                                   @RequestBody Patient patient) throws java.net.URISyntaxException {
+    @GetMapping
+    public void getPatientFromQueue() {
+        if (jmsQueueIsEmpty()) {
+            logger.info(String.format("There are no items in %s", Names.CONTACT_TRACING_WI_QUEUE));
+        }
+        else {
+            ContactTracingWorkItem workItem = takeWorkItemFromQueue();
+            patients = new Patient(workItem.getPatientId(), workItem.getFirstName(), workItem.getSurname(),
+                    workItem.getPhoneNumber(), workItem.getResult(), ContactTraced.NO);
+        }
+        // return patient;
+    }
 
+
+
+    // Sends patient info to Web UI
+    @RequestMapping(value = "/patient/"/*{patientId}"*/, method = RequestMethod.POST)
+    public ResponseEntity<Patient> sendPatientInfo(/*@PathVariable("patientId") String patientId,*/
+                                                   @RequestBody Patient patient) throws java.net.URISyntaxException {
         patients = patient;
         String path = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() +
                 "/patient/" + patient.getId();
