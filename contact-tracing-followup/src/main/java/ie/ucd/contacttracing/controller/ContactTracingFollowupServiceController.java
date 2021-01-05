@@ -93,7 +93,8 @@ public class ContactTracingFollowupServiceController {
         Contact contact = contactsPendingContact.remove(id);
         contact.setContactedStatus(isContacted);
         // Changing time unit to seconds.
-        contact.setContactedDate(Instant.now().toEpochMilli()/ 1000L);
+        contact.setContactedDate(Instant.now().getEpochSecond());
+        contact.setContactAttempts(contact.getContactAttempts() + 1);
 
         updatedContacts.addContact(contact);
         sendUpdatedContacts();
@@ -111,7 +112,7 @@ public class ContactTracingFollowupServiceController {
 
         URI uri = dns.find(CONTACT_SERVICE).orElseThrow(dns.getServiceNotFoundSupplier(CONTACT_SERVICE));
 
-        String contactsServiceURL = String.format("%s/contacts/getOutputList/{num}", uri);
+        String contactsServiceURL = String.format("%s/contacts/outputList/{num}", uri);
 
         ContactList contacts = restTemplate.getForObject(contactsServiceURL, ContactList.class, num);
 
@@ -131,8 +132,8 @@ public class ContactTracingFollowupServiceController {
         String contactsServiceURL = String.format("%s/contacts/returnedContacts", uri);
 
         HttpEntity<ContactList> entity = new HttpEntity<ContactList>(updatedContacts);
-        ResponseEntity<HttpStatus> response = restTemplate.exchange(contactsServiceURL, HttpMethod.PUT, entity,
-                HttpStatus.class);
+        ResponseEntity<String> response = restTemplate.exchange(contactsServiceURL, HttpMethod.PUT, entity,
+                String.class);
         logger.info(String.format("%d contacts sent with returned HTTP status code %s", updatedContacts.size(),
                 response.getStatusCode()));
         if (response.getStatusCode().is2xxSuccessful()) {

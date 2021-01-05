@@ -3,11 +3,19 @@ spring:
   profiles: default
   application:
     name: contact-discovery-service
+  activemq:
+    broker-url: failover://tcp://localhost:61616
+    packages:
+      trusted: '*'
 ---
 spring:
   profiles: docker
   application:
     name: contact-discovery-service
+  activemq:
+    broker-url: failover://tcp://activeMQ:61616
+    packages:
+      trusted: '*'
 eureka:
   client:
     serviceUrl:

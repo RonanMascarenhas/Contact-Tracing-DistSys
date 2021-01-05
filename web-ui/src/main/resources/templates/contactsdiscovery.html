@@ -16,23 +16,50 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
+                            <th>Patient ID</th>
                             <th>First Name</th>
                             <th>Surname</th>
                             <th>Phone Number</th>
-                            <th>Address</th>
-                            <th>Date of Case</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td th:text="${contact.firstName}"></td>
-                            <td th:text="${contact.surname}"></td>
-                            <td th:text="${contact.phoneNumber}"></td>
-                            <td th:text="${contact.address}"></td>
-                            <td th:text="${contact.dateOfCase}"></td>
+                            <td th:text="${patient.id}"></td>
+                            <td th:text="${patient.firstName}"></td>
+                            <td th:text="${patient.surname}"></td>
+                            <td th:text="${patient.phoneNumber}"></td>
                         </tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="bs-component">
+                    <p>Please enter the close contacts of <span th:text="${patient.firstName}"> the patient </span></p>
+                    <form action="#" th:action="@{/contactsdiscovery/patient/{patientId}(patientId=${patient.id})}" th:object="${subject}" method="post">
+                        <fieldset class="form-group">
+                            <div class="form-check">
+                                <label class="form-check-label">
+                                    <p>First Name: <input type="text" class="form-control" th:field="*{firstName}" /></p>
+                                    <p>Surname: <input type="text" class="form-control" th:field="*{surname}" /></p>
+                                    <p>Phone Number: <input type="text" class="form-control" th:field="*{phoneNumber}" /></p>
+                                    <p>Address: <input type="text" class="form-control" th:field="*{address}" /></p>
+                                    <button type="submit" class="btn btn-primary">Add Contact</button>
+                                </label>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="bs-component">
+                <a class="btn btn-primary" th:href="@{/contactsdiscovery/patient/remove/{patientId}(patientId=${patient.id})}">Get Another Patient</a>
             </div>
         </div>
     </div>

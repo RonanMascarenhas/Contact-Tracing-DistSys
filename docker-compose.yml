@@ -15,29 +15,78 @@ services:
     ports:
       - "9002:8761"
 
+  # Misc (DBs, ActiveMQ)
+  mongoDB:
+    image: mongo:latest
+    restart: always
+    container_name: "mongoDB"
+    volumes:
+      - ./data/db:/data/db
+    ports:
+      - 27018:27017
+  activeMQ:
+    image: rmohr/activemq:latest
+    ports:
+      - "8161:8161"
+
   # Services
   patient-info:
     build: patient-info
+    image: "patient-info:latest"
     depends_on:
       - eureka1
       - eureka2
-#  contacts:
-#    build: contacts
-#    depends_on:
-#      - eureka1
-#      - eureka2
+      - mongoDB
+    ports:
+      - "8082:8082"
+  contacts:
+    build: contacts
+    image: "contacts:latest"
+    depends_on:
+      - eureka1
+      - eureka2
+      - mongoDB
+    ports:
+      - "8085:8085"
+  contacts-discovery:
+    build: contacts-discovery
+    image: "contacts-discovery:latest"
+    depends_on:
+      - eureka1
+      - eureka2
+      - activeMQ
+      - results-discovery
+      - contact-tracing-scheduler
+    ports:
+      - "8084:8084"
+  contact-tracing-scheduler:
+    build: contact-tracing-scheduler
+    image: "contact-tracing-scheduler:latest"
+    depends_on:
+      - eureka1
+      - eureka2
+      - activeMQ
   results-discovery:
     build: results-discovery
+    image: "results-discovery:latest"
     depends_on:
       - eureka1
       - eureka2
+      - mongoDB
+      - activeMQ
+      - patient-info
+    ports:
+    - "8081:8081"
   contact-tracing-followup:
     build: contact-tracing-followup
+    image: "contact-tracing-followup:latest"
     depends_on:
       - eureka1
       - eureka2
+      - contacts
   web-ui:
     build: web-ui
+    image: "web-ui:latest"
     depends_on:
       - eureka1
       - eureka2
@@ -46,4 +95,3 @@ services:
     ports:
       - "8080:8080"
 
-# Misc (DBs, ActiveMQ)

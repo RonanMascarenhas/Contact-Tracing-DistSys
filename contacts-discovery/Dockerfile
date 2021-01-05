@@ -1,3 +1,4 @@
-FROM openjdk:8-jre-alpine
-COPY target/ContactsDiscovery-0.0.1.jar /ContactsDiscovery-0.0.1.jar
-CMD /usr/bin/java -jar /ContactsDiscovery-0.0.1.jar
+FROM openjdk:11.0.8-jre
+COPY target/contacts-discovery-*.jar /ContactsDiscovery.jar
+ENV SETTINGS = "docker"
+CMD java -Dspring.profiles.active=docker -jar  /ContactsDiscovery.jar
