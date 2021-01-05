@@ -93,7 +93,8 @@ public class ContactTracingFollowupServiceController {
         Contact contact = contactsPendingContact.remove(id);
         contact.setContactedStatus(isContacted);
         // Changing time unit to seconds.
-        contact.setContactedDate(Instant.now().toEpochMilli()/ 1000L);
+        contact.setContactedDate(Instant.now().getEpochSecond());
+        contact.setContactAttempts(contact.getContactAttempts() + 1);
 
         updatedContacts.addContact(contact);
         sendUpdatedContacts();
