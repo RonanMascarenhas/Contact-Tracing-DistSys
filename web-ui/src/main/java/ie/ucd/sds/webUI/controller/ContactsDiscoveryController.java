@@ -96,12 +96,15 @@ public class ContactsDiscoveryController {
         return "contactsdiscovery";
     }
 
+    @GetMapping("/patient/null")
+    public String nullPatient() {
+        return "patients/noPatients";
+    }
+
     @GetMapping("/patient/remove/{patientId}")
     public String removePatient(@PathVariable("patientId") String patientId) {
-        logger.info(String.format("The patient about to be removed has map value %s and %s", patients.get(patientId), patients.entrySet()));
         patients.remove(patientId);
-        logger.info(String.format("The removed patient has map value %s and %s", patients.get(patientId), patients.entrySet()));
-        logger.info(String.format("The patientId %s was removed from the map", patientId));
+        logger.info(String.format("The removed patient has map value %s", patients.get(patientId)));
 
         return "redirect:/contactsdiscovery/patient";
     }
