@@ -5,8 +5,10 @@ package ie.ucd.contactsDiscovery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -19,7 +21,9 @@ import service.exception.NoSuchContactException;
 import service.exception.NoSuchServiceException;
 import service.messages.Contact;
 import service.messages.ContactList;
+import service.messages.ContactTracingWorkItem;
 
+import javax.jms.ConnectionFactory;
 import java.net.URI;
 
 import static service.core.Names.CONTACT_SERVICE;
@@ -27,18 +31,39 @@ import static service.core.Names.CONTACT_SERVICE;
 @RestController
 @RequestMapping("/contactsdiscovery")
 public class ContactsDiscoveryServiceController {
-
     private final EurekaDNS dns;
     private final RestTemplateBuilder templateBuilder;
-    //private final WorkItemQueuePusher callQueue;
+    public static final long FIVE_SECOND_TIMEOUT = 5 * 1000;
     private final Logger logger = LoggerFactory.getLogger(ContactsDiscoveryServiceController.class);
+    private final JmsTemplate jmsTemplate;
 
     @Autowired
-    public ContactsDiscoveryServiceController(EurekaDNS dns, RestTemplateBuilder templateBuilder) {// WorkItemQueuePusher callQueue) {
+    public ContactsDiscoveryServiceController(EurekaDNS dns, RestTemplateBuilder templateBuilder,
+                                              @Qualifier("jmsConnectionFactory") ConnectionFactory connectionFactory
+    ) {
         this.dns = dns;
         this.templateBuilder = templateBuilder;
-        //this.callQueue = callQueue;
+
+        jmsTemplate = new JmsTemplate(connectionFactory);
+        jmsTemplate.setDefaultDestinationName(Names.CONTACT_TRACING_WI_QUEUE);
+        jmsTemplate.setReceiveTimeout(FIVE_SECOND_TIMEOUT);
     }
+
+    private boolean jmsQueueIsEmpty() {
+        Boolean empty = jmsTemplate.browse((session, queueBrowser) -> !queueBrowser.getEnumeration().hasMoreElements());
+        return (empty == null) ? false : empty;
+    }
+
+    private ContactTracingWorkItem takeWorkItemFromQueue() {
+        return (ContactTracingWorkItem) jmsTemplate.receiveAndConvert();
+    }
+
+    // FIXME
+    //      Always first check if there is anything in the queue using jmsQueueIsEmpty() from above
+    //      Then use takeWorkItemFromQueue() to get a workItem.
+    //      takeWorkItemFromQueue() may return a null if there are many queue consumers (for a busy workload). It's
+    //      a good idea to check for this -> return 200 if there is a workItem, 204 if not.
+    // ENDFIXME
 
     // Gets next patient info from queue
     // TODO: ?? Talk to Joe about this Im not sure how to receive from his JMS Template
