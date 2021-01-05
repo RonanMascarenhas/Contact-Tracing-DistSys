@@ -98,7 +98,7 @@ public class ResultsDiscoveryController {
 
         model.addAttribute("workItem", workItem);
         model.addAttribute("statusValues", PatientWorkItem.Status.values());
-        return "/results/call/index";
+        return "results/call/index";
     }
 
     @PostMapping("/call")
@@ -113,10 +113,10 @@ public class ResultsDiscoveryController {
         RestTemplate template = new RestTemplate();
         ResponseEntity<?> response = template.postForEntity(workItemEndpoint, workItem, String.class);
 
-        if (response.getStatusCode() == HttpStatus.OK) return "/results/call/accepted";
+        if (response.getStatusCode() == HttpStatus.OK) return "results/call/accepted";
         // else
         model.addAttribute("msg", "There was an error and the Work-Item was not accepted");
-        return "/problem";
+        return "problem";
     }
 
     @PostMapping("/")

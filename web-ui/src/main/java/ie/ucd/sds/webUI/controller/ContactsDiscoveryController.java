@@ -9,11 +9,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import service.core.Names;
+import service.core.Patient;
+import service.core.Subject;
 import service.dns.EurekaDNS;
 import service.exception.NoSuchContactException;
+import service.exception.NoSuchServiceException;
 import service.messages.Contact;
 
 import java.net.URI;
+import java.util.HashMap;
 
 @Controller
 @RequestMapping(value = "/contactsdiscovery")
@@ -21,55 +25,123 @@ public class ContactsDiscoveryController {
 
     private EurekaDNS dns;
     private static final Logger logger = LoggerFactory.getLogger(ContactsDiscoveryController.class.getSimpleName());
+    private final HashMap<String, Patient> patients;
 
     @Autowired
-    public ContactsDiscoveryController() {
-
+    public ContactsDiscoveryController(EurekaDNS dns) {
+        this. dns = dns;
+        this.patients = new HashMap<>();
     }
 
-    @PostMapping("contactsdiscovery/patient/{patientId}")
-    public String sendPatientInfo(@PathVariable("patientId") String patientId,
-                                  @RequestBody Contact contact, Model model) {
+    @GetMapping("/patient")
+    public String getPatient() {
+        String redirectURL = "";
         try {
             URI uri = dns.find(Names.CONTACT_DISCOVERY).orElseThrow(dns.getServiceNotFoundSupplier(Names.CONTACT_DISCOVERY));
 
-            String contactsDiscoveryURL = uri + "/contactsdiscovery/patient" + patientId;
+            String contactsDiscoveryURL = uri + "/contactsdiscovery/patient";
 
-            HttpEntity<Contact> request = new HttpEntity<>(contact);
+            System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 
             RestTemplate restTemplate = new RestTemplate();
-            restTemplate.postForEntity(contactsDiscoveryURL, request, Contact.class);
-        } catch (Exception e) {
-            logger.error(String.format("Error sending patient %s to WebUI: %s", patientId, e.getMessage()));
-            model.addAttribute("error", e.getClass().getName());
 
-            return "Contact Tracing Error";
+            System.out.println("THE URI IS: " + contactsDiscoveryURL);
+            Patient patient = restTemplate.getForObject(contactsDiscoveryURL, Patient.class);
+
+            System.out.println("======================================================================" + patient.getId());
+            patients.put(patient.getId(), patient);
+
+            return "redirect:/contactsdiscovery/patient/" + patient.getId();
+        } catch (NoSuchServiceException e) {
+            e.printStackTrace();
         }
 
-        return "redirect:/contactsdiscovery/";
+        return redirectURL;
     }
 
-    @GetMapping("contactsdiscovery/patient/{patientId}")
-    public String getContactsInfo(@PathVariable("patientId") String patientId, Model model) {
+    @GetMapping("/patient/{patientId}")
+    public String getPatientInfo(@PathVariable("patientId") String patientId, Model model) {
+        if (patients.containsKey(patientId)) {
+            Patient patient = patients.get(patientId);
+            model.addAttribute("patient", patient);
+        } else {
+            logger.error(String.format("Error finding patient with ID: %s", patientId));
+
+            // TODO error page
+        }
+
+        return "contactsdiscovery";
+    }
+
+    @PostMapping("/patient/{patientId}")
+    public String getContactInfo(@PathVariable("patientId") String patientId, @RequestBody Subject subject,
+                                 @RequestParam("newContact") boolean bool) {
         try {
             URI uri = dns.find(Names.CONTACT_DISCOVERY).orElseThrow(dns.getServiceNotFoundSupplier(Names.CONTACT_DISCOVERY));
 
             String contactsDiscoveryURL = uri + "/contactsdiscovery/patient/" + patientId;
 
+            HttpEntity<Subject> request = new HttpEntity<>(subject);
+
             RestTemplate restTemplate = new RestTemplate();
-            Contact contact = restTemplate.getForObject(contactsDiscoveryURL, Contact.class);
+            restTemplate.postForEntity(contactsDiscoveryURL, request, Subject.class);
 
-            if (contact == null) throw new NoSuchContactException();
+            if (bool) {
+                return "redirect:/contactsdiscovery/patient/" + patientId;
+            }
+            else {
+                return "redirect:/";
+            }
 
-            model.addAttribute("contact", contact);
-        } catch (Exception e) {
-            logger.error(String.format("Error receiving contact from patient with ID %s: %s", patientId, e.getMessage()));
-
-            model.addAttribute("error", e.getClass().getName());
-
-            return "Contact Tracing Error";
+        } catch (NoSuchServiceException e) {
+            e.printStackTrace();
         }
 
-        return "contact";
+        return "contactsdiscovery";
     }
+//    @PostMapping("/patient/{patientId}")
+//    public String sendPatientInfo(@PathVariable("patientId") String patientId,
+//                                  @RequestBody Contact contact, Model model) {
+//        try {
+//            URI uri = dns.find(Names.CONTACT_DISCOVERY).orElseThrow(dns.getServiceNotFoundSupplier(Names.CONTACT_DISCOVERY));
+//
+//            String contactsDiscoveryURL = uri + "/contactsdiscovery/patient" + patientId;
+//
+//            HttpEntity<Contact> request = new HttpEntity<>(contact);
+//
+//            RestTemplate restTemplate = new RestTemplate();
+//            restTemplate.postForEntity(contactsDiscoveryURL, request, Contact.class);
+//        } catch (Exception e) {
+//            logger.error(String.format("Error sending patient %s to WebUI: %s", patientId, e.getMessage()));
+//            model.addAttribute("error", e.getClass().getName());
+//
+//            return "Contact Tracing Error";
+//        }
+//
+//        return "redirect:/contactsdiscovery/";
+//    }
+//
+//    @GetMapping("/patient/{patientId}")
+//    public String getContactsInfo(@PathVariable("patientId") String patientId, Model model) {
+//        try {
+//            URI uri = dns.find(Names.CONTACT_DISCOVERY).orElseThrow(dns.getServiceNotFoundSupplier(Names.CONTACT_DISCOVERY));
+//
+//            String contactsDiscoveryURL = uri + "/contactsdiscovery/patient/" + patientId;
+//
+//            RestTemplate restTemplate = new RestTemplate();
+//            Contact contact = restTemplate.getForObject(contactsDiscoveryURL, Contact.class);
+//
+//            if (contact == null) throw new NoSuchContactException();
+//
+//            model.addAttribute("contact", contact);
+//        } catch (Exception e) {
+//            logger.error(String.format("Error receiving contact from patient with ID %s: %s", patientId, e.getMessage()));
+//
+//            model.addAttribute("error", e.getClass().getName());
+//
+//            return "Contact Tracing Error";
+//        }
+//
+//        return "contact";
+//    }
 }

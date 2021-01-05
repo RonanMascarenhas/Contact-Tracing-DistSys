@@ -25,6 +25,7 @@ import service.messages.ContactTracingWorkItem;
 
 import javax.jms.ConnectionFactory;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import static service.core.Names.CONTACT_SERVICE;
 
@@ -65,48 +66,39 @@ public class ContactsDiscoveryServiceController {
     //      a good idea to check for this -> return 200 if there is a workItem, 204 if not.
     // ENDFIXME
 
-    // Gets next patient info from queue
-    // TODO: ?? Talk to Joe about this Im not sure how to receive from his JMS Template
-//    @RequestMapping(value = "/contactsdiscovery", method = RequestMethod.GET)
-//    ResponseEntity<ContactTracingWorkItem> getPatientInfo()  {
-//        if (callQueue.isEmpty)
-//    }
-
-    Patient patients = new Patient();
+    Patient patient = new Patient();
 
     @GetMapping
-    public void getPatientFromQueue() {
+    public Patient getPatientFromQueue() throws URISyntaxException {
         if (jmsQueueIsEmpty()) {
             logger.info(String.format("There are no items in %s", Names.CONTACT_TRACING_WI_QUEUE));
         }
         else {
             ContactTracingWorkItem workItem = takeWorkItemFromQueue();
-            patients = new Patient(workItem.getPatientId(), workItem.getFirstName(), workItem.getSurname(),
+            patient = new Patient(workItem.getPatientId(), workItem.getFirstName(), workItem.getSurname(),
                     workItem.getPhoneNumber(), workItem.getResult(), ContactTraced.NO);
         }
-        // return patient;
+        return patient;
     }
 
-
-
     // Sends patient info to Web UI
-    @RequestMapping(value = "/patient/"/*{patientId}"*/, method = RequestMethod.POST)
-    public ResponseEntity<Patient> sendPatientInfo(/*@PathVariable("patientId") String patientId,*/
-                                                   @RequestBody Patient patient) throws java.net.URISyntaxException {
-        patients = patient;
-        String path = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() +
-                "/patient/" + patient.getId();
+    @GetMapping("/patient")
+    public Patient sendPatientInfo() throws java.net.URISyntaxException {
+        patient = getPatientFromQueue();
+//        String path = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() +
+//                "/patient/" + patient.getId();
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setLocation(new URI(path));
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(new URI(path));
-
-        return new ResponseEntity<>(patient, headers, HttpStatus.CREATED);
+        return patient;
+        //return new ResponseEntity<>(patient, headers, HttpStatus.CREATED);
     }
 
     ContactList closeContacts = new ContactList();
 
     // Get contacts info from Web UI
-    @RequestMapping(value = "/patient/{patientId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/patient/{patientId}", method = RequestMethod.POST)
     public void getContactsInfo(@PathVariable("patientId") String patientId, @RequestBody Subject subject) throws NoSuchServiceException {
         subject.setCaseId(patientId);
 
@@ -154,12 +146,12 @@ public class ContactsDiscoveryServiceController {
     // Changes the patient's contact traced status to 'YES' and updates the PatientInfo Database
     @PutMapping
     public ResponseEntity<Patient> setPatientContactTraced() throws NoSuchServiceException {
-        patients.setCt(ContactTraced.YES);
+        patient.setCt(ContactTraced.YES);
 
         RestTemplate template = new RestTemplate();
         URI patientInfoEndpoint = getPatientInfoEndpoint();
-        ResponseEntity<Patient> response = template.postForEntity(patientInfoEndpoint, patients, Patient.class);
-        logger.info(String.format("Patient with ID %s has been contact traced", patients.getId(),
+        ResponseEntity<Patient> response = template.postForEntity(patientInfoEndpoint, patient, Patient.class);
+        logger.info(String.format("Patient with ID %s has been contact traced", patient.getId(),
                 response.getStatusCode()));
 
         return response;
