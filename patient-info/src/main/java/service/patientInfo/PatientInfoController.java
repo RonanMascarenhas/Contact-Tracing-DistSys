@@ -22,7 +22,6 @@ public class PatientInfoController {
     private PatientRepository patientRepo;
 
     private Patient patient;
-//    private HashMap<String, Patient> patientList = new HashMap<>();
 
 
 //    CRUD - add patient to list. Returns 201 CREATED response with URI of new resource in header
@@ -30,8 +29,6 @@ public class PatientInfoController {
 //    (Results Discovery service ensures no duplicate phone numbers added)
     @RequestMapping(value = "/patientinfo", method = RequestMethod.POST)
     public ResponseEntity<Patient> addPatient(@RequestBody Patient patient) {
-
-//        patientRepo.deleteAll();
         System.out.println("\nCONTROLLER-ADD: PATIENT RECEIVED: " + patient.getFirstName() + patient.getSurname());
 
 //        validation check - ensure none of the fields are NULL, except for id
@@ -41,7 +38,6 @@ public class PatientInfoController {
         }
 
         patientRepo.save(patient);
-//        patientList.put(patient.getId(), patient);
 
         System.out.println("\nCONTROLLER-ADD: Patients found with findAll():");
         System.out.println("-------------------------------");
@@ -63,13 +59,6 @@ public class PatientInfoController {
         }
 
         return new ResponseEntity<>(patient, headers, HttpStatus.CREATED);
-
-        /*
-        String path = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()+ "/book/"+phone_number;
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Location", path);
-        return new ResponseEntity<>(headers, HttpStatus.NO_CONTENT);
-         */
     }
 
 
@@ -91,7 +80,6 @@ public class PatientInfoController {
     //    if duplicate phone numbers present will return first matching patient (Results Discovery service ensures no duplicate phone numbers added)
 //    also used by Contacts service to find out if a patient exists
     @RequestMapping(value="/patientinfo/{phoneNumber}", method=RequestMethod.GET)
-//    @ResponseStatus(value=HttpStatus.OK)
     public ResponseEntity<Patient> getPatient(@PathVariable String phoneNumber) {
         System.out.println("\nEntered CONTROLLER-GETPATIENT. Phone number: " + phoneNumber);
         List<Patient> patientList = patientRepo.findAll();
@@ -103,7 +91,6 @@ public class PatientInfoController {
                 pTemp = p;
                 break;
             }
-//            System.out.println(p.toString());
         }
 
         String path = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()+ "/patientinfo/"
@@ -120,10 +107,7 @@ public class PatientInfoController {
         if (pTemp==null)    {
             System.out.println("\nCONTROLLER-GETPATIENT: no matching patient found for input phone number");
             return new ResponseEntity<>(headers, HttpStatus.NO_CONTENT);
-//            throw new NoSuchPatientException();
-//            return null;
         }
-//        return pTemp;
         return new ResponseEntity<>(pTemp, headers, HttpStatus.OK);
     }
 
@@ -245,7 +229,6 @@ public class PatientInfoController {
                 if (p.getCt() == ContactTraced.NO)  {
                     selectedPatientList.add(p);
                 }
-//            System.out.println(p.toString());
             }
             return selectedPatientList;
         }
