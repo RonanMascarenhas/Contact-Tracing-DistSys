@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import service.core.Names;
 import service.core.Patient;
+import service.core.Result;
 import service.dns.DomainNameService;
 import service.exception.NoSuchServiceException;
 import service.messages.PatientResultCallWorkItem;
@@ -88,7 +89,7 @@ public class ResultsDiscoveryController {
 
         // Add a new CallPatientResultWorkItem to the queue
         HttpStatus status = patientResponse.getStatusCode();
-        if (status.is2xxSuccessful()) {
+        if (status.is2xxSuccessful() && patient.getResult() != Result.NEGATIVE) {
             logger.debug(String.format("Queueing %s for a Results Call", patient));
             callQueue.add(patientResponse.getBody());
         } else logger.warn(String.format("Service at %s returned status %s", patientInfoEndpoint, status));
