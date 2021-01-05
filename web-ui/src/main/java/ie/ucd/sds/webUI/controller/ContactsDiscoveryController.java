@@ -62,8 +62,10 @@ public class ContactsDiscoveryController {
     @GetMapping("/patient/{patientId}")
     public String getPatientInfo(@PathVariable("patientId") String patientId, Model model) {
         if (patients.containsKey(patientId)) {
+            Subject subject = new Subject();
             Patient patient = patients.get(patientId);
             model.addAttribute("patient", patient);
+            model.addAttribute("subject", subject);
         } else {
             logger.error(String.format("Error finding patient with ID: %s", patientId));
 
@@ -74,8 +76,7 @@ public class ContactsDiscoveryController {
     }
 
     @PostMapping("/patient/{patientId}")
-    public String getContactInfo(@PathVariable("patientId") String patientId, @RequestBody Subject subject,
-                                 @RequestParam("newContact") boolean bool) {
+    public String getContactInfo(@PathVariable("patientId") String patientId, @ModelAttribute Subject subject) {
         try {
             URI uri = dns.find(Names.CONTACT_DISCOVERY).orElseThrow(dns.getServiceNotFoundSupplier(Names.CONTACT_DISCOVERY));
 
@@ -86,13 +87,7 @@ public class ContactsDiscoveryController {
             RestTemplate restTemplate = new RestTemplate();
             restTemplate.postForEntity(contactsDiscoveryURL, request, Subject.class);
 
-            if (bool) {
-                return "redirect:/contactsdiscovery/patient/" + patientId;
-            }
-            else {
-                return "redirect:/";
-            }
-
+            return "redirect:/contactsdiscovery/patient/" + patientId;
         } catch (NoSuchServiceException e) {
             e.printStackTrace();
         }

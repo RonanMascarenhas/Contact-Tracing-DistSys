@@ -38,7 +38,7 @@
             <div class="col-lg-6">
                 <div class="bs-component">
                     <p>Please enter the close contacts of <span th:text="${patient.firstName}"> the patient </span></p>
-                    <form action="#" th:action="@{/contactsdiscovery/patient/{patientId}(id=${patient.id})}" th:object="${subject}" method="post">
+                    <form action="#" th:action="@{/contactsdiscovery/patient/{patientId}(patientId=${patient.id})}" th:object="${subject}" method="post">
                         <fieldset class="form-group">
                             <div class="form-check">
                                 <label class="form-check-label">
@@ -46,12 +46,20 @@
                                     <p>Surname: <input type="text" class="form-control" th:field="*{surname}" /></p>
                                     <p>Phone Number: <input type="text" class="form-control" th:field="*{phoneNumber}" /></p>
                                     <p>Address: <input type="text" class="form-control" th:field="*{address}" /></p>
-                                    <!--<p><input type="reset" value="Reset" /> <input type="submit" value="Submit" /></p>-->
+                                    <button type="submit" class="btn btn-primary">Add Contact</button>
                                 </label>
                             </div>
                         </fieldset>
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="bs-component">
+                <a class="btn btn-primary" th:href="@{/contactsdiscovery/patient}">Get Another Patient</a>
             </div>
         </div>
     </div>
