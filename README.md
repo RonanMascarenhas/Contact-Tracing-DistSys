@@ -3,7 +3,7 @@ This was a group project completed for the COMP30220 "Distributed Systems" modul
 * Finn O'Neill [@o-Fon-o](https://github.com/o-Fon-o)
 * Dónal Mac Fhionnlaoich [@donalmacfhionnlaoich](https://github.com/donalmacfhionnlaoich)
 * Husni Khalaf [@HusniKhalaf](https://github.com/HusniKhalaf)
-* Ronan Mascarenhas [@RSM61123](https://github.com/RSM61123)
+* Ronan Mascarenhas [@RonanMascarenhas](https://github.com/RonanMascarenhas)
 * Joseph Dempsey [@Joe-Demp](https://github.com/Joe-Demp)
 
 Our submission documents: Report.pdf and VideoReport.mov have been left out of this repository. The original README has also been edited to exclude student numbers and references to these documents. [BFG Repo-Cleaner](https://rtyley.github.io/bfg-repo-cleaner/) was used to scrub the repository of the documents and sensitive information. The remainder of that README follows.
